@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 215.44 215.44">
+  <defs>
+    <style>
+      .cls-1, .cls-2 {
+        fill: none;
+        stroke: #000;
+        stroke-miterlimit: 10;
+        stroke-width: .75px;
+      }
+
+      .cls-2 {
+        stroke-linecap: square;
+      }
+    </style>
+  </defs>
+  <g id="Layer_1-2" data-name="Layer 1">
+    <g>
+      <circle class="cls-1" cx="107.83" cy="107.83" r="60.45"/>
+      <rect class="cls-1" x="47.16" y="47.16" width="121.12" height="121.12"/>
+      <g>
+        <line class="cls-1" x1="168.28" y1="89.08" x2="214.91" y2="89.08"/>
+        <line class="cls-2" x1="210.73" y1="93.27" x2="214.91" y2="89.08"/>
+        <line class="cls-2" x1="210.73" y1="84.9" x2="214.91" y2="89.08"/>
+      </g>
+      <g>
+        <line class="cls-1" x1="107.72" y1="47.16" x2="107.72" y2=".53"/>
+        <line class="cls-2" x1="111.91" y1="4.72" x2="107.72" y2=".53"/>
+        <line class="cls-2" x1="103.54" y1="4.72" x2="107.72" y2=".53"/>
+      </g>
+      <g>
+        <line class="cls-1" x1="107.72" y1="168.28" x2="107.72" y2="214.91"/>
+        <line class="cls-2" x1="103.54" y1="210.73" x2="107.72" y2="214.91"/>
+        <line class="cls-2" x1="111.91" y1="210.73" x2="107.72" y2="214.91"/>
+      </g>
+      <g>
+        <line class="cls-1" x1="168.28" y1="126.51" x2="214.91" y2="126.51"/>
+        <line class="cls-2" x1="210.73" y1="130.69" x2="214.91" y2="126.51"/>
+        <line class="cls-2" x1="210.73" y1="122.32" x2="214.91" y2="126.51"/>
+      </g>
+      <g>
+        <line class="cls-1" x1="47.16" y1="126.51" x2=".53" y2="126.51"/>
+        <line class="cls-2" x1="4.72" y1="122.32" x2=".53" y2="126.51"/>
+        <line class="cls-2" x1="4.72" y1="130.69" x2=".53" y2="126.51"/>
+      </g>
+      <g>
+        <line class="cls-1" x1="47.16" y1="89.08" x2=".53" y2="89.08"/>
+        <line class="cls-2" x1="4.72" y1="84.9" x2=".53" y2="89.08"/>
+        <line class="cls-2" x1="4.72" y1="93.27" x2=".53" y2="89.08"/>
+      </g>
+      <g>
+        <g id="_Radial_Repeat_" data-name="&amp;lt;Radial Repeat&amp;gt;">
+          <circle cx="107.83" cy="168.35" r="5.13"/>
+        </g>
+        <g id="_Radial_Repeat_-2" data-name="&amp;lt;Radial Repeat&amp;gt;">
+          <circle cx="72.24" cy="156.78" r="5.13"/>
+        </g>
+        <g id="_Radial_Repeat_-3" data-name="&amp;lt;Radial Repeat&amp;gt;">
+          <circle cx="50.24" cy="126.51" r="5.13"/>
+        </g>
+        <g id="_Radial_Repeat_-4" data-name="&amp;lt;Radial Repeat&amp;gt;">
+          <circle cx="50.24" cy="89.08" r="5.13"/>
+        </g>
+        <g id="_Radial_Repeat_-5" data-name="&amp;lt;Radial Repeat&amp;gt;">
+          <circle cx="72.24" cy="58.81" r="5.13"/>
+        </g>
+        <g id="_Radial_Repeat_-6" data-name="&amp;lt;Radial Repeat&amp;gt;">
+          <circle cx="107.83" cy="47.24" r="5.13"/>
+        </g>
+        <g id="_Radial_Repeat_-7" data-name="&amp;lt;Radial Repeat&amp;gt;">
+          <circle cx="143.42" cy="58.81" r="5.13"/>
+        </g>
+        <g id="_Radial_Repeat_-8" data-name="&amp;lt;Radial Repeat&amp;gt;">
+          <circle cx="165.42" cy="89.08" r="5.13"/>
+        </g>
+        <g id="_Radial_Repeat_-9" data-name="&amp;lt;Radial Repeat&amp;gt;">
+          <circle cx="165.42" cy="126.51" r="5.13"/>
+        </g>
+        <g id="_Radial_Repeat_-10" data-name="&amp;lt;Radial Repeat&amp;gt;">
+          <circle cx="143.42" cy="156.78" r="5.13"/>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

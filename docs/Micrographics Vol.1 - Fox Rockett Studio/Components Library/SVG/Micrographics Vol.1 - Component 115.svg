@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 39.66 17.83">
+  <defs>
+    <style>
+      .cls-1 {
+        font-family: RobotoMono-SemiBold, 'Roboto Mono';
+        font-size: 10px;
+        font-variation-settings: 'wght' 600;
+        font-weight: 600;
+        letter-spacing: -.12em;
+      }
+    </style>
+  </defs>
+  <g id="Layer_1-2" data-name="Layer 1">
+    <g>
+      <path d="M30.74,1c4.37,0,7.92,3.55,7.92,7.92s-3.55,7.92-7.92,7.92-7.92-3.55-7.92-7.92,3.55-7.92,7.92-7.92M30.74,0c-4.92,0-8.92,3.99-8.92,8.92s3.99,8.92,8.92,8.92,8.92-3.99,8.92-8.92S35.66,0,30.74,0h0Z"/>
+      <path d="M14.87,1l4.57,7.92-4.57,7.92H5.73L1.15,8.92,5.73,1h9.14M15.44,0H5.15L0,8.92l5.15,8.92h10.3l5.15-8.92L15.44,0h0Z"/>
+      <text class="cls-1" transform="translate(27.74 12.35)"><tspan x="0" y="0">Z</tspan></text>
+      <text class="cls-1" transform="translate(7.32 12.37)"><tspan x="0" y="0">A</tspan></text>
+    </g>
+  </g>
+</svg>

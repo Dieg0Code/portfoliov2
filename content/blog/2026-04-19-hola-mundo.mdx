@@ -1,0 +1,103 @@
+---
+title: "Hola mundo: estrenando el blog"
+date: "2026-04-19"
+excerpt: "Primera entrada. Pruebo code blocks, tablas, callouts y un diagrama Mermaid para confirmar que el pipeline MDX está afinado."
+tags: ["Meta", "MDX", "Next.js"]
+locale: "es"
+---
+
+Este es el primer post. Sirve doble: inauguro el blog y confirmo que el
+pipeline MDX está renderizando todo lo que necesito.
+
+## Por qué un blog propio
+
+Porque escribir en Medium o dev.to es prestado, y porque quiero meter
+componentes React custom inline. No encontré nada más directo que `.mdx`
+en una carpeta + Next.js leyendo el filesystem en build.
+
+<Callout tone="info" title="Stack">
+  `next-mdx-remote/rsc` + `gray-matter` + `remark-gfm` + `rehype-pretty-code`
+  sobre `shiki`. Mermaid se carga lazy solo si el post lo necesita.
+</Callout>
+
+## Code blocks
+
+Un bloque de Python:
+
+```python
+def fib(n: int) -> int:
+    a, b = 0, 1
+    for _ in range(n):
+        a, b = b, a + b
+    return a
+
+print(fib(10))  # 55
+```
+
+Uno de Go:
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+    ch := make(chan int, 1)
+    ch <- 42
+    fmt.Println(<-ch)
+}
+```
+
+Y uno de TSX con un type helper:
+
+```tsx
+type Post<T extends string = "es"> = {
+  slug: string;
+  locale: T;
+};
+
+const hello: Post = { slug: "hola-mundo", locale: "es" };
+```
+
+## Tabla GFM
+
+| Item            | Estado   | Notas                         |
+|-----------------|----------|-------------------------------|
+| MDX base        | ✅       | `next-mdx-remote/rsc`         |
+| Syntax highlight| ✅       | shiki zero-runtime            |
+| Mermaid         | ✅       | lazy-loaded en cliente        |
+| RSS             | pendiente| siguiente sprint              |
+
+## Lista con checkboxes
+
+- [x] Pipeline básico funcionando
+- [x] Callout custom
+- [ ] RSS feed
+- [ ] OG images dinámicas
+
+## Blockquote
+
+> La mejor arquitectura es la que no escribes hasta que la necesitas.
+
+## Diagrama Mermaid
+
+<Mermaid
+  chart={`graph LR
+    A[.mdx en disco] --> B[gray-matter]
+    B --> C[next-mdx-remote/rsc]
+    C --> D[remark-gfm]
+    C --> E[rehype-pretty-code]
+    D --> F[HTML renderizado]
+    E --> F
+    F --> G[Archive Aesthetic]`}
+  caption="Pipeline de un post desde el archivo al HTML final."
+/>
+
+## Link interno
+
+Vuelve al [índice del blog](/blog) o a la [home](/).
+
+---
+
+Eso es todo por ahora. Lo siguiente será RSS y un widget de últimos posts
+en la home.

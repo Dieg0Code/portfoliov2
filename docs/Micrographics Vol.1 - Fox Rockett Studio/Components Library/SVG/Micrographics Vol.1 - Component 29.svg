@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 119.01 140">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+        stroke: #000;
+        stroke-miterlimit: 10;
+        stroke-width: .75px;
+      }
+    </style>
+  </defs>
+  <g id="Layer_1-2" data-name="Layer 1">
+    <g>
+      <circle class="cls-1" cx="61.94" cy="82.93" r="6"/>
+      <circle class="cls-1" cx="107.81" cy="82.93" r="6"/>
+      <circle class="cls-1" cx="6.38" cy="82.93" r="6"/>
+      <circle class="cls-1" cx="14.17" cy="130.7" r="6"/>
+      <circle class="cls-1" cx="61.94" cy="118.89" r="6"/>
+      <circle class="cls-1" cx="112.64" cy="133.63" r="6"/>
+      <circle class="cls-1" cx="108.56" cy="36.32" r="6"/>
+      <circle class="cls-1" cx="61.94" cy="6.38" r="6"/>
+      <circle class="cls-1" cx="30.14" cy="51.13" r="6"/>
+      <line class="cls-1" x1="61.94" y1="72.47" x2="61.94" y2="16.84"/>
+      <line class="cls-1" x1="54.54" y1="75.53" x2="37.22" y2="58.21"/>
+      <line class="cls-1" x1="51.48" y1="82.93" x2="16.84" y2="82.93"/>
+      <line class="cls-1" x1="54.54" y1="90.33" x2="21.57" y2="123.31"/>
+      <line class="cls-1" x1="61.94" y1="93.4" x2="61.94" y2="108.28"/>
+      <line class="cls-1" x1="69.34" y1="90.33" x2="105.24" y2="126.23"/>
+      <line class="cls-1" x1="72.41" y1="82.93" x2="97.23" y2="82.93"/>
+      <line class="cls-1" x1="69.34" y1="75.53" x2="100.89" y2="43.99"/>
+    </g>
+  </g>
+</svg>

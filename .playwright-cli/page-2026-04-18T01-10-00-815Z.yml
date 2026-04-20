@@ -1,0 +1,72 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - generic [ref=e8]:
+          - paragraph [ref=e9]: underbyteLabs
+          - paragraph [ref=e10]: ataxx-zero arena
+        - generic [ref=e11]: beta
+      - link "Entrar" [ref=e13] [cursor=pointer]:
+        - /url: /auth/login
+    - navigation [ref=e14]:
+      - link "Inicio" [ref=e15] [cursor=pointer]:
+        - /url: /
+        - img [ref=e16]
+        - generic [ref=e19]: Inicio
+      - link "Ranking" [ref=e21] [cursor=pointer]:
+        - /url: /ranking
+        - img [ref=e22]
+        - generic [ref=e28]: Ranking
+      - link "Perfil" [ref=e29] [cursor=pointer]:
+        - /url: /profile
+        - img [ref=e30]
+        - generic [ref=e33]: Perfil
+  - generic [ref=e35]:
+    - generic [ref=e37]:
+      - generic [ref=e38]:
+        - generic [ref=e39]: UNDERBYTELABS // ATAXX-ZERO
+        - heading "Arena Ataxx" [level=3] [ref=e40]
+        - paragraph [ref=e41]: Duelo tactico en tiempo real. Entra a cola, encuentra rival y juega.
+      - generic [ref=e42]:
+        - generic [ref=e43]:
+          - button "Buscar partida" [ref=e45] [cursor=pointer]:
+            - img [ref=e48]
+            - generic [ref=e52]: Buscar partida
+          - link "Crear sala" [ref=e53] [cursor=pointer]:
+            - /url: /lobby
+            - img [ref=e54]
+            - text: Crear sala
+          - link "Configuracion avanzada" [ref=e59] [cursor=pointer]:
+            - /url: /profile#laboratorio
+            - text: Configuracion avanzada
+            - img [ref=e60]
+        - generic [ref=e62]:
+          - generic [ref=e63]:
+            - paragraph [ref=e64]:
+              - img [ref=e65]
+              - text: Cola competitiva
+            - generic [ref=e68]: Inactiva
+          - paragraph [ref=e69]: Pulsa "Buscar partida" para entrar a la cola automatica.
+        - generic [ref=e70]:
+          - generic [ref=e71]:
+            - paragraph [ref=e72]: 7x7
+            - paragraph [ref=e73]: tablero
+          - generic [ref=e74]:
+            - paragraph [ref=e75]: ranked
+            - paragraph [ref=e76]: cola
+          - generic [ref=e77]:
+            - paragraph [ref=e78]: live
+            - paragraph [ref=e79]: replay
+    - generic [ref=e80]:
+      - generic [ref=e83]:
+        - heading "Sesion activa" [level=3] [ref=e84]:
+          - img [ref=e85]
+          - text: Sesion activa
+        - paragraph [ref=e88]: Tu progreso se refleja en ranking y historial de partidas.
+      - generic [ref=e90]:
+        - generic [ref=e91]:
+          - heading "Temporada en vivo" [level=3] [ref=e93]:
+            - img [ref=e94]
+            - text: Temporada en vivo
+          - paragraph [ref=e100]: Top actual de la temporada.
+        - paragraph [ref=e102]: Cargando temporada...

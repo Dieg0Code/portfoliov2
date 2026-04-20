@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 49.14 98.27">
+  <defs>
+    <style>
+      .cls-1, .cls-2 {
+        fill: none;
+        stroke: #000;
+        stroke-miterlimit: 10;
+        stroke-width: .75px;
+      }
+
+      .cls-2 {
+        stroke-linecap: square;
+      }
+    </style>
+  </defs>
+  <g id="Layer_1-2" data-name="Layer 1">
+    <g>
+      <g id="_Radial_Repeat_" data-name="&amp;lt;Radial Repeat&amp;gt;">
+        <line class="cls-2" x1=".38" y1="49.14" x2=".38" y2=".38"/>
+      </g>
+      <g id="_Radial_Repeat_-2" data-name="&amp;lt;Radial Repeat&amp;gt;">
+        <line class="cls-1" x1=".38" y1="49.14" x2="15.44" y2="2.76"/>
+      </g>
+      <g id="_Radial_Repeat_-3" data-name="&amp;lt;Radial Repeat&amp;gt;">
+        <line class="cls-1" x1=".38" y1="49.14" x2="29.04" y2="9.69"/>
+      </g>
+      <g id="_Radial_Repeat_-4" data-name="&amp;lt;Radial Repeat&amp;gt;">
+        <line class="cls-1" x1=".38" y1="49.14" x2="39.82" y2="20.48"/>
+      </g>
+      <g id="_Radial_Repeat_-5" data-name="&amp;lt;Radial Repeat&amp;gt;">
+        <line class="cls-1" x1=".38" y1="49.14" x2="46.75" y2="34.07"/>
+      </g>
+      <g id="_Radial_Repeat_-6" data-name="&amp;lt;Radial Repeat&amp;gt;">
+        <line class="cls-1" x1=".38" y1="49.14" x2="49.14" y2="49.14"/>
+      </g>
+      <g id="_Radial_Repeat_-7" data-name="&amp;lt;Radial Repeat&amp;gt;">
+        <line class="cls-1" x1=".38" y1="49.14" x2="46.75" y2="64.2"/>
+      </g>
+      <g id="_Radial_Repeat_-8" data-name="&amp;lt;Radial Repeat&amp;gt;">
+        <line class="cls-1" x1=".38" y1="49.14" x2="39.82" y2="77.8"/>
+      </g>
+      <g id="_Radial_Repeat_-9" data-name="&amp;lt;Radial Repeat&amp;gt;">
+        <line class="cls-1" x1=".38" y1="49.14" x2="29.04" y2="88.59"/>
+      </g>
+      <g id="_Radial_Repeat_-10" data-name="&amp;lt;Radial Repeat&amp;gt;">
+        <line class="cls-1" x1=".38" y1="49.14" x2="15.44" y2="95.51"/>
+      </g>
+      <g id="_Radial_Repeat_-11" data-name="&amp;lt;Radial Repeat&amp;gt;">
+        <line class="cls-2" x1=".38" y1="49.14" x2=".38" y2="97.9"/>
+      </g>
+    </g>
+  </g>
+</svg>

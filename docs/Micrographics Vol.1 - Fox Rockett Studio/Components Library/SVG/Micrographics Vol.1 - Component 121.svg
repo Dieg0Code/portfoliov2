@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34.8 36.41">
+  <defs>
+    <style>
+      .cls-1, .cls-2, .cls-3 {
+        stroke: #000;
+        stroke-miterlimit: 10;
+        stroke-width: .75px;
+      }
+
+      .cls-2, .cls-3 {
+        fill: none;
+      }
+
+      .cls-3 {
+        stroke-linecap: square;
+      }
+    </style>
+  </defs>
+  <g id="Layer_1-2" data-name="Layer 1">
+    <g>
+      <g>
+        <g id="_Radial_Repeat_" data-name="&amp;lt;Radial Repeat&amp;gt;">
+          <circle class="cls-1" cx="17.4" cy="34.64" r="1.39"/>
+        </g>
+        <g id="_Radial_Repeat_-2" data-name="&amp;lt;Radial Repeat&amp;gt;">
+          <circle class="cls-1" cx="7.74" cy="31.5" r="1.39"/>
+        </g>
+        <g id="_Radial_Repeat_-3" data-name="&amp;lt;Radial Repeat&amp;gt;">
+          <circle class="cls-1" cx="1.77" cy="23.28" r="1.39"/>
+        </g>
+        <g id="_Radial_Repeat_-4" data-name="&amp;lt;Radial Repeat&amp;gt;">
+          <circle class="cls-1" cx="1.77" cy="13.13" r="1.39"/>
+        </g>
+        <g id="_Radial_Repeat_-5" data-name="&amp;lt;Radial Repeat&amp;gt;">
+          <circle class="cls-1" cx="7.74" cy="4.91" r="1.39"/>
+        </g>
+        <g id="_Radial_Repeat_-6" data-name="&amp;lt;Radial Repeat&amp;gt;">
+          <circle class="cls-1" cx="17.4" cy="1.77" r="1.39"/>
+        </g>
+        <g id="_Radial_Repeat_-7" data-name="&amp;lt;Radial Repeat&amp;gt;">
+          <circle class="cls-1" cx="27.06" cy="4.91" r="1.39"/>
+        </g>
+        <g id="_Radial_Repeat_-8" data-name="&amp;lt;Radial Repeat&amp;gt;">
+          <circle class="cls-1" cx="33.03" cy="13.13" r="1.39"/>
+        </g>
+        <g id="_Radial_Repeat_-9" data-name="&amp;lt;Radial Repeat&amp;gt;">
+          <circle class="cls-1" cx="33.03" cy="23.29" r="1.39"/>
+        </g>
+        <g id="_Radial_Repeat_-10" data-name="&amp;lt;Radial Repeat&amp;gt;">
+          <circle class="cls-1" cx="27.06" cy="31.5" r="1.39"/>
+        </g>
+      </g>
+      <g>
+        <line class="cls-2" x1="17.4" y1="3.16" x2="17.4" y2="13.87"/>
+        <line class="cls-3" x1="16.24" y1="12.71" x2="17.4" y2="13.87"/>
+        <line class="cls-3" x1="18.56" y1="12.71" x2="17.4" y2="13.87"/>
+      </g>
+      <g>
+        <line class="cls-2" x1="17.4" y1="33.25" x2="17.4" y2="22.54"/>
+        <line class="cls-3" x1="18.56" y1="23.7" x2="17.4" y2="22.54"/>
+        <line class="cls-3" x1="16.24" y1="23.7" x2="17.4" y2="22.54"/>
+      </g>
+    </g>
+  </g>
+</svg>

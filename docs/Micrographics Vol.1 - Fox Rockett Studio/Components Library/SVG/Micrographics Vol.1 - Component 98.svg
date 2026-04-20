@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 79.66 33.65">
+  <defs>
+    <style>
+      .cls-1 {
+        font-family: RobotoMono-Medium, 'Roboto Mono';
+        font-size: 4.71px;
+        font-variation-settings: 'wght' 500;
+        font-weight: 500;
+      }
+
+      .cls-2 {
+        fill: none;
+        stroke: #000;
+        stroke-miterlimit: 10;
+        stroke-width: .75px;
+      }
+    </style>
+  </defs>
+  <g id="Layer_1-2" data-name="Layer 1">
+    <g>
+      <ellipse class="cls-2" cx="76.64" cy="5.74" rx="2.65" ry="5.35"/>
+      <path d="M24.11,16.02c-3.53,0-6.4-2.87-6.4-6.4V0h-1.61v9.63c0,3.53-2.87,6.4-6.4,6.4H.08v1.61h9.63c3.53,0,6.4,2.87,6.4,6.4v9.63h1.61v-9.63c0-3.53,2.87-6.4,6.4-6.4h55.48v-1.61H24.11Z"/>
+      <text class="cls-1" transform="translate(75.23 7.45)"><tspan x="0" y="0">H</tspan></text>
+      <ellipse class="cls-2" cx="71.35" cy="5.74" rx="2.65" ry="5.35"/>
+      <text class="cls-1" transform="translate(69.93 7.45)"><tspan x="0" y="0">P</tspan></text>
+      <ellipse class="cls-2" cx="8.32" cy="5.74" rx="2.65" ry="5.35"/>
+      <text class="cls-1" transform="translate(6.9 7.45)"><tspan x="0" y="0">K</tspan></text>
+      <ellipse class="cls-2" cx="3.02" cy="5.74" rx="2.65" ry="5.35"/>
+      <text class="cls-1" transform="translate(1.61 7.45)"><tspan x="0" y="0">V</tspan></text>
+    </g>
+  </g>
+</svg>

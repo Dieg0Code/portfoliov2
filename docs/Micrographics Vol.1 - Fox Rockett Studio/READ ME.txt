@@ -1,0 +1,14 @@
+IMPORTANT: 
+
+Ensure you install the font families 'Roboto Mono' and 'Noto Sans JP' from the links below before opening any of the editable files. This ensures all text elements remain as they should. If you have these fonts already installed from another source/website, I'd highly recommend installing it from the link below anyway as we have seen issues with people using slightly different versions of the fonts.
+
+DOWNLOAD LINKS:
+
+https://fonts.google.com/specimen/Roboto+Mono
+https://fonts.google.com/noto/specimen/Noto+Sans+JP
+
+
+HOW TO EDIT TEXT:
+
+This pack includes both an editable master file (.ai file including all 70 graphics) and individual editable SVGs.
+I'd recommend using Adobe Illustrator to edit the text as this is the program the assets were created in. However not everyone has access to Illustrator so some alternatives are Affinity Designer, or Inkscape. Both of which are free and fully capable of editing the text in these graphics.

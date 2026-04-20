@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 104.69 9.44">
+  <defs>
+    <style>
+      .cls-1 {
+        font-family: RobotoMono-SemiBold, 'Roboto Mono';
+        font-size: 8px;
+        font-variation-settings: 'wght' 600;
+        font-weight: 600;
+        letter-spacing: -.05em;
+      }
+    </style>
+  </defs>
+  <g id="Layer_1-2" data-name="Layer 1">
+    <g>
+      <polygon points="8.83 0 1.63 0 0 0 0 1.63 0 8.83 1.63 8.83 1.63 2.78 7.44 8.59 8.59 7.44 2.78 1.63 8.83 1.63 8.83 0"/>
+      <path d="M59.73.75c2.02,0,3.67,1.64,3.67,3.67s-1.64,3.67-3.67,3.67H17.61c-2.02,0-3.67-1.64-3.67-3.67s1.64-3.67,3.67-3.67h42.12M59.73,0H17.61C15.17,0,13.19,1.98,13.19,4.42s1.98,4.42,4.42,4.42h42.12c2.44,0,4.42-1.98,4.42-4.42S62.17,0,59.73,0h0Z"/>
+      <path d="M100.27.75c2.02,0,3.67,1.64,3.67,3.67s-1.64,3.67-3.67,3.67-3.67-1.64-3.67-3.67,1.64-3.67,3.67-3.67M100.27,0C97.83,0,95.86,1.98,95.86,4.42s1.98,4.42,4.42,4.42,4.42-1.98,4.42-4.42S102.71,0,100.27,0h0Z"/>
+      <text class="cls-1" transform="translate(71.13 7.28)"><tspan x="0" y="0">2026</tspan></text>
+    </g>
+  </g>
+</svg>

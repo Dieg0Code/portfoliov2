@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90.69 90.69">
+  <defs>
+    <style>
+      .cls-1 {
+        stroke-dasharray: 4.17 6.25;
+      }
+
+      .cls-1, .cls-2, .cls-3 {
+        fill: none;
+        stroke: #000;
+        stroke-miterlimit: 10;
+        stroke-width: .75px;
+      }
+
+      .cls-2 {
+        stroke-dasharray: 4.04 6.05;
+      }
+
+      .cls-3 {
+        stroke-dasharray: 3.97 5.96;
+      }
+    </style>
+  </defs>
+  <g id="Layer_1-2" data-name="Layer 1">
+    <g>
+      <g>
+        <circle class="cls-2" cx="45.35" cy="45.35" r="44.97" transform="translate(-13.9 20.81) rotate(-22.5)"/>
+        <circle class="cls-3" cx="45.35" cy="45.35" r="31.61" transform="translate(-9.21 79.06) rotate(-76.72)"/>
+        <circle class="cls-1" cx="45.35" cy="45.35" r="18.24" transform="translate(-13.9 20.81) rotate(-22.5)"/>
+      </g>
+      <circle cx="74.7" cy="11.32" r="3.22"/>
+      <circle cx="53.26" cy="75.92" r="3.22"/>
+      <circle cx="34.94" cy="30.33" r="3.22"/>
+      <g>
+        <path d="M44.97,37.59c-1.86.09-3.7.84-5.12,2.26s-2.17,3.26-2.26,5.12h7.38v-7.38Z"/>
+        <path d="M45.72,53.1c1.86-.09,3.7-.84,5.12-2.26s2.17-3.26,2.26-5.12h-7.38v7.38Z"/>
+        <path d="M53.1,44.97c-.09-1.86-.84-3.7-2.26-5.12-1.42-1.42-3.26-2.17-5.12-2.26v7.38h7.38Z"/>
+        <path d="M37.59,45.72c.09,1.86.84,3.7,2.26,5.12s3.26,2.17,5.12,2.26v-7.38h-7.38Z"/>
+        <path d="M44.97,53.1v3.5h.75v-3.5c-.25.01-.5.01-.75,0Z"/>
+        <path d="M53.1,45.72h3.5v-.75h-3.5c.01.25.01.5,0,.75Z"/>
+        <path d="M45.72,37.59v-3.5h-.75v3.5c.25-.01.5-.01.75,0Z"/>
+        <path d="M37.59,44.97h-3.5v.75h3.5c-.01-.25-.01-.5,0-.75Z"/>
+      </g>
+    </g>
+  </g>
+</svg>

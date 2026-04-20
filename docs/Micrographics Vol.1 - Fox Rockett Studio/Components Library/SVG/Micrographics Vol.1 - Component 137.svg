@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 42.11 22.06">
+  <defs>
+    <style>
+      .cls-1 {
+        font-family: RobotoMono-Bold, 'Roboto Mono';
+        font-size: 6.59px;
+        font-variation-settings: 'wght' 700;
+        font-weight: 700;
+        letter-spacing: -.05em;
+      }
+
+      .cls-2 {
+        fill: none;
+        stroke: #000;
+        stroke-miterlimit: 10;
+        stroke-width: 2px;
+      }
+    </style>
+  </defs>
+  <g id="Layer_1-2" data-name="Layer 1">
+    <g>
+      <path class="cls-2" d="M31.08,1c-1.83,0-3.54.5-5.01,1.35-1.48-.86-3.19-1.35-5.01-1.35-5.54,0-10.03,4.49-10.03,10.03s4.49,10.03,10.03,10.03c1.83,0,3.54-.5,5.01-1.35,1.48.86,3.19,1.35,5.01,1.35,5.54,0,10.03-4.49,10.03-10.03S36.62,1,31.08,1Z"/>
+      <circle class="cls-2" cx="11.03" cy="11.03" r="10.03"/>
+      <line class="cls-2" x1="11.03" y1="11.03" x2="21.06" y2="11.03"/>
+      <line class="cls-2" x1="12.14" y1="6.95" x2="19.94" y2="6.95"/>
+      <line class="cls-2" x1="12.14" y1="15.1" x2="19.94" y2="15.1"/>
+      <line class="cls-2" x1="16.04" y1="2.34" x2="16.04" y2="19.71"/>
+      <text class="cls-1" transform="translate(23.49 13.21)"><tspan x="0" y="0">2026</tspan></text>
+    </g>
+  </g>
+</svg>
