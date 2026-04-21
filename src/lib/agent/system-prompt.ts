@@ -1,5 +1,23 @@
+import fs from "node:fs";
+import path from "node:path";
 import { contactEmail, githubProfile, homeContent } from "@/components/home/content";
 import type { PostMeta } from "@/lib/blog/types";
+
+const AGENT_MD_PATH = path.join(process.cwd(), "content", "agent.md");
+
+const IS_DEV = process.env.NODE_ENV !== "production";
+let cachedAgentMd: string | null = null;
+function readAgentMarkdown(): string {
+  if (!IS_DEV && cachedAgentMd !== null) return cachedAgentMd;
+  try {
+    const contents = fs.readFileSync(AGENT_MD_PATH, "utf8");
+    cachedAgentMd = contents;
+    return contents;
+  } catch {
+    cachedAgentMd = "";
+    return "";
+  }
+}
 
 export function buildSystemPrompt(posts: PostMeta[]): string {
   const es = homeContent.es;
@@ -11,34 +29,30 @@ export function buildSystemPrompt(posts: PostMeta[]): string {
     .map((p) => `  - /blog/${p.slug}: ${p.title}`)
     .join("\n");
 
-  return `Eres el agente del archivo de Diego Obando. Vives en una caja tipo terminal al pie del portfolio.
+  const agentMd = readAgentMarkdown();
+  const persona = agentMd ? `${agentMd}\n\n---\n\n` : "";
 
-# Tono
-- Mono, conciso, archive-aesthetic. Respondes corto, en tono de consola.
-- Español por defecto si el usuario escribe en español, inglés si escribe en inglés.
-- Sin emojis. Sin markdown pesado. Frases breves, líneas cortas.
-- Puedes usar glifos sobrios cuando ayuden: ▸, ◆, §, · — nunca decoración gratuita.
+  return `${persona}# Datos dinámicos (esto sale de content.ts y /posts — no lo edites en el .md)
 
-# Quién es Diego
+## Contacto
 - ${es.brand.name} — ${es.brand.strapline}
-- Contacto: ${contactEmail} · ${githubProfile}
+- Email: ${contactEmail}
+- GitHub: ${githubProfile}
 
-# Proyectos destacados
+## Proyectos destacados
 ${projectLines}
 
-# Posts del blog disponibles
+## Posts del blog disponibles
 ${postLines || "  (ninguno todavía)"}
 
-# Tools — cuándo usarlas
-- navigate: cuando el usuario quiera ver una sección (trabajo, notas, contacto, inicio). Secciones válidas: top, work, notes, contact.
-- setLocale: cuando pidan cambiar idioma. Valores: "es" o "en".
-- openPost: cuando pidan abrir un post específico del blog. Usa exactamente los slugs listados arriba.
-- openExternal: para abrir github, email, o el blog completo. Targets válidos: "github", "email", "blog".
-- listProjects: si necesitas repasar la lista completa de proyectos antes de recomendar.
+## Tools disponibles
+- navigate({ section }) — top | work | notes | contact
+- setLocale({ locale }) — es | en
+- openPost({ slug }) — usa solo slugs listados arriba
+- openExternal({ target }) — github | email | blog
+- listProjects() — devuelve la lista completa estructurada
 
-# Reglas
-- Si el usuario pide una acción navegable, úsala — no describas, ejecuta la tool.
-- Después de ejecutar una tool, responde 1 línea confirmando (ej. "▸ abriendo work"). No repitas el contenido.
-- Si preguntan algo que no sabes del portfolio, admítelo breve. No inventes proyectos ni posts.
-- Nunca uses otra dirección de email que no sea la de arriba.`;
+---
+
+_La persona y reglas vienen de \`content/agent.md\`. Los datos dinámicos de \`src/components/home/content.ts\` y los posts del blog._`;
 }

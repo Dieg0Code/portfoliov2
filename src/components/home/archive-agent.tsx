@@ -79,37 +79,44 @@ function extractToolLabels(parts: unknown): string[] {
 export function ArchiveAgent({ locale, onSetLocale }: ArchiveAgentProps) {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
+  const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const transcriptRef = useRef<HTMLDivElement>(null);
 
-  const { messages, sendMessage, status, stop, setMessages } = useChat({
+  const chat = useChat({
     transport: new DefaultChatTransport({ api: "/api/agent" }),
     onToolCall: async ({ toolCall }) => {
       const name = toolCall.toolName;
       const input = (toolCall.input ?? {}) as Record<string, unknown>;
+      let output: Record<string, unknown> = { ok: false, error: "unhandled tool" };
       if (name === "navigate") {
         const ok = scrollToSection(String(input.section ?? ""));
         setOpen(false);
-        return ok ? { ok: true } : { ok: false, error: "section not found" };
-      }
-      if (name === "setLocale") {
+        output = ok ? { ok: true } : { ok: false, error: "section not found" };
+      } else if (name === "setLocale") {
         const next = input.locale === "en" ? "en" : "es";
         onSetLocale(next);
-        return { ok: true, locale: next };
-      }
-      if (name === "openPost") {
+        output = { ok: true, locale: next };
+      } else if (name === "openPost") {
         const slug = String(input.slug ?? "").replace(/^\/+|\/+$/g, "");
-        if (!slug) return { ok: false, error: "missing slug" };
-        window.location.href = `/blog/${slug}`;
-        return { ok: true };
-      }
-      if (name === "openExternal") {
+        if (!slug) {
+          output = { ok: false, error: "missing slug" };
+        } else {
+          window.location.href = `/blog/${slug}`;
+          output = { ok: true };
+        }
+      } else if (name === "openExternal") {
         const ok = openExternalTarget(String(input.target ?? ""));
-        return ok ? { ok: true } : { ok: false, error: "unknown target" };
+        output = ok ? { ok: true } : { ok: false, error: "unknown target" };
       }
-      return { ok: false, error: "unhandled tool" };
+      chat.addToolResult({
+        tool: name,
+        toolCallId: toolCall.toolCallId,
+        output
+      });
     }
   });
+  const { messages, sendMessage, status, stop, setMessages } = chat;
 
   useEffect(() => {
     if (open) inputRef.current?.focus();
@@ -172,6 +179,7 @@ export function ArchiveAgent({ locale, onSetLocale }: ArchiveAgentProps) {
       className="archive-agent"
       data-open={open ? "true" : "false"}
       data-busy={busy ? "true" : "false"}
+      data-focused={focused ? "true" : "false"}
       aria-live="polite"
     >
       {open && messages.length > 0 && (
@@ -184,8 +192,18 @@ export function ArchiveAgent({ locale, onSetLocale }: ArchiveAgentProps) {
             <button
               type="button"
               className="archive-agent__close"
+              onClick={() => setOpen(false)}
+              aria-label={locale === "es" ? "minimizar" : "minimize"}
+              title={locale === "es" ? "minimizar (⌘K para restaurar)" : "minimize (⌘K to restore)"}
+            >
+              ─
+            </button>
+            <button
+              type="button"
+              className="archive-agent__close"
               onClick={clear}
-              aria-label={locale === "es" ? "cerrar" : "close"}
+              aria-label={locale === "es" ? "cerrar y limpiar" : "close and clear"}
+              title={locale === "es" ? "cerrar y limpiar" : "close and clear"}
             >
               ×
             </button>
@@ -227,34 +245,62 @@ export function ArchiveAgent({ locale, onSetLocale }: ArchiveAgentProps) {
         </div>
       )}
       <form className="archive-agent__dock" onSubmit={onSubmit}>
-        <span className="archive-agent__dock-corner">┌</span>
-        <span className="archive-agent__dock-glyph">◆</span>
-        <input
-          ref={inputRef}
-          className="archive-agent__input"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={onInputKey}
-          placeholder={placeholder}
-          aria-label={placeholder}
-          autoComplete="off"
-          spellCheck={false}
-          disabled={busy}
-        />
-        <span className="archive-agent__status" data-status={status}>
-          {statusLabel}
+        <span className="archive-agent__scanline" aria-hidden="true" />
+        <span className="archive-agent__frame-top" aria-hidden="true">
+          <span className="archive-agent__frame-corner">┌─</span>
+          <span className="archive-agent__frame-label">
+            ARCHIVE::STDIN
+          </span>
+          <span className="archive-agent__frame-dash" />
+          <span className="archive-agent__frame-kbd">⌘K</span>
+          <span className="archive-agent__frame-corner">─┐</span>
         </span>
-        {messages.length > 0 && (
-          <button
-            type="button"
-            className="archive-agent__dock-clear"
-            onClick={clear}
-            aria-label={locale === "es" ? "limpiar" : "clear"}
-          >
-            ×
-          </button>
-        )}
-        <span className="archive-agent__dock-corner">┐</span>
+        <div className="archive-agent__dock-body">
+          <span className="archive-agent__dock-glyph">❯</span>
+          <input
+            ref={inputRef}
+            className="archive-agent__input"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={onInputKey}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            placeholder={placeholder}
+            aria-label={placeholder}
+            autoComplete="off"
+            spellCheck={false}
+            disabled={busy}
+          />
+          <span className="archive-agent__status" data-status={status}>
+            {statusLabel}
+          </span>
+          {messages.length > 0 && !open && (
+            <button
+              type="button"
+              className="archive-agent__dock-restore"
+              onClick={() => setOpen(true)}
+              aria-label={locale === "es" ? "restaurar chat" : "restore chat"}
+              title={locale === "es" ? "restaurar chat" : "restore chat"}
+            >
+              ▴ {messages.length}
+            </button>
+          )}
+          {messages.length > 0 && (
+            <button
+              type="button"
+              className="archive-agent__dock-clear"
+              onClick={clear}
+              aria-label={locale === "es" ? "limpiar" : "clear"}
+            >
+              ×
+            </button>
+          )}
+        </div>
+        <span className="archive-agent__frame-bottom" aria-hidden="true">
+          <span className="archive-agent__frame-corner">└─</span>
+          <span className="archive-agent__frame-dash" />
+          <span className="archive-agent__frame-corner">─┘</span>
+        </span>
       </form>
     </div>
   );

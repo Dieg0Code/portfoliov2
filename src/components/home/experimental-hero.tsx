@@ -12,7 +12,7 @@ import { MotionLink } from "@/components/home/motion-link";
 import { MotionReveal } from "@/components/home/motion-reveal";
 import { PretextHeadline } from "@/components/home/pretext-headline";
 import { ScrambleText } from "@/components/home/scramble-text";
-import { StreamArrows, TerminalCursor } from "@/components/home/ascii-motion";
+import { StreamArrows } from "@/components/home/ascii-motion";
 import type { HomeContentBundle, HomeLocale } from "@/components/home/content";
 import type { SelectedMicrographicMarkup } from "@/lib/micrographics/selected-assets";
 
@@ -102,7 +102,6 @@ export function ExperimentalHero({
             </span>
             <span className="home-hero__status-note">
               {content.statusNote}
-              <TerminalCursor className="home-hero__status-cursor" />
             </span>
             <span className="home-hero__status-loc">{content.location}</span>
           </div>

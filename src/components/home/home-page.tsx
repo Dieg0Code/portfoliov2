@@ -26,6 +26,7 @@ import { ScrambleText } from "@/components/home/scramble-text";
 import { ContactEmailLink } from "@/components/shared/contact-email-link";
 import { BreathingMarker, PulseDot, SignalTicker } from "@/components/home/ascii-motion";
 import { ScrollProgressRail } from "@/components/home/scroll-progress-rail";
+import { ArchiveAgent } from "@/components/home/archive-agent";
 import type { SelectedMicrographicMarkup } from "@/lib/micrographics/selected-assets";
 import type { PulseItem } from "@/lib/github/pulse";
 import { extractRepoName, type GithubStats, type RepoStats } from "@/lib/github/stats";
@@ -161,6 +162,33 @@ export function HomePage({ assets, pulse, stats, latestPost }: HomePageProps) {
   useEffect(() => {
     document.documentElement.lang = locale;
   }, [locale]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !("IntersectionObserver" in window)) return;
+    const cards = document.querySelectorAll<HTMLElement>(".project-card");
+    if (!cards.length) return;
+    const timeouts = new Set<number>();
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          const el = entry.target as HTMLElement;
+          el.dataset.bloomed = "true";
+          const id = window.setTimeout(() => {
+            delete el.dataset.bloomed;
+          }, 1500);
+          timeouts.add(id);
+          io.unobserve(el);
+        }
+      },
+      { threshold: 0.35 }
+    );
+    cards.forEach((c) => io.observe(c));
+    return () => {
+      io.disconnect();
+      timeouts.forEach((id) => window.clearTimeout(id));
+    };
+  }, []);
 
   useEffect(() => {
     const shell = shellRef.current;
@@ -975,6 +1003,10 @@ export function HomePage({ assets, pulse, stats, latestPost }: HomePageProps) {
           </div>
         </FlowLayer>
       </FlowLayer>
+      <ArchiveAgent
+        locale={locale}
+        onSetLocale={(next) => startTransition(() => setLocale(next))}
+      />
     </main>
   );
 }

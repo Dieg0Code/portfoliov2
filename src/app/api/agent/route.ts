@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
   const result = streamText({
     model: githubModels("gpt-4o-mini"),
     system,
-    messages: convertToModelMessages(body.messages),
+    messages: await convertToModelMessages(body.messages),
     tools: agentTools,
     stopWhen: stepCountIs(6),
     temperature: 0.4

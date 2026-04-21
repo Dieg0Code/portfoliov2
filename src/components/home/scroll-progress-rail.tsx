@@ -70,8 +70,16 @@ export function ScrollProgressRail() {
     if (intensity > prior) echoMap.set(e.pos, intensity);
   }
 
+  const jumpTo = (index: number) => {
+    const doc = document.documentElement;
+    const max = doc.scrollHeight - window.innerHeight;
+    if (max <= 0) return;
+    const target = (index / (RAIL_HEIGHT - 1)) * max;
+    window.scrollTo({ top: target, behavior: "smooth" });
+  };
+
   return (
-    <div className="scroll-rail" aria-hidden="true">
+    <div className="scroll-rail">
       {Array.from({ length: RAIL_HEIGHT }, (_, i) => {
         const isActive = i === pos;
         const echoIntensity = echoMap.get(i) ?? 0;
@@ -83,11 +91,15 @@ export function ScrollProgressRail() {
             : echoIntensity > 0
               ? "◦"
               : "·";
+        const pct = Math.round((i / (RAIL_HEIGHT - 1)) * 100);
         return (
-          <span
+          <button
             key={i}
+            type="button"
             className="scroll-rail__row"
             data-state={state}
+            onClick={() => jumpTo(i)}
+            aria-label={`Scroll to ${pct}%`}
             style={
               state === "echo"
                 ? { opacity: 0.5 + echoIntensity * 0.4 }
@@ -95,7 +107,7 @@ export function ScrollProgressRail() {
             }
           >
             {glyph}
-          </span>
+          </button>
         );
       })}
     </div>
