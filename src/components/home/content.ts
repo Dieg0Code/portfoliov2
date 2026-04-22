@@ -143,7 +143,7 @@ export const homeContent: Record<HomeLocale, HomeContentBundle> = {
       secondaryCta: "Escríbeme",
       asideEyebrow: "Así me muevo",
       asideBody:
-        "Backend en Go, arquitecturas serverless (AWS Lambda, Terraform), IA aplicada con agentes y búsqueda semántica sobre los datos de cada cliente. Autor del SDK Syndicate, con contribuciones open source mergeadas y proyectos en producción.",
+        "Backend en Go, arquitecturas serverless (AWS Lambda, Terraform), IA aplicada con agentes y búsqueda semántica sobre los datos de cada cliente. Mantengo Syndicate, un SDK propio para orquestar agentes en Go, y aporto a proyectos open source cuando algo me pide arreglo.",
       list: [
         "Entender antes de escribir código",
         "Integrar IA solo cuando aporta valor real",
@@ -372,7 +372,7 @@ export const homeContent: Record<HomeLocale, HomeContentBundle> = {
       secondaryCta: "Write to me",
       asideEyebrow: "How I move",
       asideBody:
-        "Backend in Go, serverless architectures (AWS Lambda, Terraform), AI applied with agents and semantic search over each client's own data. Author of the Syndicate SDK, with merged open-source contributions and production projects.",
+        "Backend in Go, serverless architectures (AWS Lambda, Terraform), AI applied with agents and semantic search over each client's own data. I maintain Syndicate, a small Go SDK for orchestrating agents, and contribute to open source whenever something needs fixing.",
       list: [
         "Understand before writing code",
         "Integrate AI only when it adds real value",

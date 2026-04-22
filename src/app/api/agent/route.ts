@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
   const system = buildSystemPrompt(posts);
 
   const result = streamText({
-    model: githubModels("gpt-4o-mini"),
+    model: githubModels.chat("gpt-4o-mini"),
     system,
     messages: await convertToModelMessages(body.messages),
     tools: agentTools,
