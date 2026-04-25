@@ -754,7 +754,7 @@ export function HomePage({ assets, pulse, stats, latestPost }: HomePageProps) {
               {pulseItems.length > 0 ? (
                 <ul className="blog-bento__pulse-list">
                   {pulseItems.slice(0, 3).map((item, itemIndex) => (
-                    <li key={`${item.date}-${item.project}`}>
+                    <li key={`${item.date}-${item.project}-${itemIndex}`}>
                       <span className="blog-bento__pulse-lead">
                         <BreathingMarker
                           className="blog-bento__pulse-marker"

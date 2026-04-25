@@ -3578,6 +3578,22 @@ h3 {
   word-wrap: break-word;
 }
 
+.archive-agent__text[data-reveal="true"] {
+  animation: archive-agent-text-reveal 520ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+@keyframes archive-agent-text-reveal {
+  0%   { opacity: 0; transform: translateY(3px); filter: blur(2px); }
+  60%  { opacity: 0.85; filter: blur(0.4px); }
+  100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .archive-agent__text[data-reveal="true"] {
+    animation: none;
+  }
+}
+
 .archive-agent__tool {
   display: inline-flex;
   align-items: baseline;

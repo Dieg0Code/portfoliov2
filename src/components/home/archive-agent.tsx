@@ -14,11 +14,15 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { contactEmail, githubProfile, type HomeLocale } from "@/components/home/content";
 import { AgentThinking } from "@/components/home/agent-thinking";
+import { collectClientTelemetry } from "@/lib/agent/telemetry/client";
+import type { ClientTelemetry } from "@/lib/agent/telemetry/types";
 
 type ArchiveAgentProps = {
   locale: HomeLocale;
   onSetLocale: (next: HomeLocale) => void;
 };
+
+type ThreadSummary = { text: string; coversThroughId: string };
 
 type Thread = {
   id: string;
@@ -26,68 +30,11 @@ type Thread = {
   createdAt: number;
   updatedAt: number;
   messages: UIMessage[];
+  summary?: ThreadSummary;
 };
 
 const STORAGE_KEY = "archive-agent-threads-v1";
 const ACTIVE_KEY = "archive-agent-active-v1";
-
-const SCRAMBLE_GLYPHS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ#@%=+/<>[]";
-function randomGlyph() {
-  return SCRAMBLE_GLYPHS[Math.floor(Math.random() * SCRAMBLE_GLYPHS.length)] ?? "#";
-}
-
-function ScrambleReveal({ text, onDone }: { text: string; onDone?: () => void }) {
-  const [revealed, setRevealed] = useState(0);
-  const [tick, setTick] = useState(0);
-  const rafRef = useRef<number | null>(null);
-  const onDoneRef = useRef(onDone);
-  onDoneRef.current = onDone;
-
-  useEffect(() => {
-    if (typeof window !== "undefined" &&
-        window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setRevealed(text.length);
-      onDoneRef.current?.();
-      return;
-    }
-    // target ~1.6s reveal regardless of length, capped at 2.4s for very long
-    const totalFrames = Math.min(144, Math.max(48, Math.round(text.length * 0.9)));
-    const charsPerFrame = Math.max(1, Math.ceil(text.length / totalFrames));
-    let cur = 0;
-    const step = () => {
-      cur = Math.min(text.length, cur + charsPerFrame);
-      setRevealed(cur);
-      setTick((n) => (n + 1) & 0xff);
-      if (cur < text.length) {
-        rafRef.current = requestAnimationFrame(step);
-      } else {
-        rafRef.current = null;
-        onDoneRef.current?.();
-      }
-    };
-    rafRef.current = requestAnimationFrame(step);
-    return () => {
-      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
-    };
-  }, [text]);
-
-  // Render the FULL text from frame 0: revealed prefix as real chars,
-  // unrevealed suffix as random glyphs, but preserve whitespace so the
-  // wrapped layout matches the final paragraph exactly (no reflow).
-  void tick; // ensure re-render refreshes glyphs
-  let out = "";
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
-    if (i < revealed) {
-      out += ch;
-    } else if (ch === " " || ch === "\n" || ch === "\t") {
-      out += ch;
-    } else {
-      out += randomGlyph();
-    }
-  }
-  return <>{out}</>;
-}
 
 const SECTION_IDS: Record<string, string> = {
   top: "top",
@@ -195,8 +142,70 @@ export function ArchiveAgent({ locale, onSetLocale }: ArchiveAgentProps) {
   const transcriptRef = useRef<HTMLDivElement>(null);
   const isSwitchingRef = useRef(false);
 
+  // Refs read by the transport's prepareSendMessagesRequest — we need the
+  // latest thread context at send-time, not whatever was in scope when the
+  // transport was constructed.
+  const activeThreadIdRef = useRef<string | null>(null);
+  const threadsRef = useRef<Thread[]>([]);
+  const clientTelemetryRef = useRef<ClientTelemetry | null>(null);
+  const localeRef = useRef<HomeLocale>(locale);
+  activeThreadIdRef.current = activeThreadId;
+  threadsRef.current = threads;
+  localeRef.current = locale;
+
+  // Passive client telemetry — collected once per mount and reused in every
+  // request body. No PII, no fingerprinting — just navigator/Intl/screen
+  // values any page can read.
+  useEffect(() => {
+    if (clientTelemetryRef.current) return;
+    clientTelemetryRef.current = collectClientTelemetry();
+  }, []);
+
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: "/api/agent",
+        prepareSendMessagesRequest: ({ messages, body }) => {
+          const tid = activeThreadIdRef.current;
+          const thread = tid
+            ? threadsRef.current.find((t) => t.id === tid)
+            : undefined;
+          return {
+            body: {
+              ...(body ?? {}),
+              messages,
+              threadId: tid ?? undefined,
+              priorSummary: thread?.summary,
+              locale: localeRef.current,
+              clientTelemetry: clientTelemetryRef.current ?? undefined
+            }
+          };
+        }
+      }),
+    []
+  );
+
   const chat = useChat({
-    transport: new DefaultChatTransport({ api: "/api/agent" }),
+    transport,
+    onData: (part) => {
+      if (part.type !== "data-summary") return;
+      const data = (part as { data?: { text?: string; coversThroughId?: string } })
+        .data;
+      if (!data?.text || !data.coversThroughId) return;
+      const tid = activeThreadIdRef.current;
+      if (!tid) return;
+      setThreads((prev) =>
+        prev.map((t) =>
+          t.id === tid
+            ? {
+                ...t,
+                summary: { text: data.text!, coversThroughId: data.coversThroughId! },
+                updatedAt: Date.now()
+              }
+            : t
+        )
+      );
+    },
     onToolCall: async ({ toolCall }) => {
       const name = toolCall.toolName;
       const input = (toolCall.input ?? {}) as Record<string, unknown>;
@@ -454,7 +463,7 @@ export function ArchiveAgent({ locale, onSetLocale }: ArchiveAgentProps) {
     isSwitchingRef.current = true;
     setMessages([]);
     setThreads((prev) => prev.map((t) => t.id === activeThreadId
-      ? { ...t, messages: [], title: locale === "es" ? "nueva conversación" : "new conversation", updatedAt: Date.now() }
+      ? { ...t, messages: [], summary: undefined, title: locale === "es" ? "nueva conversación" : "new conversation", updatedAt: Date.now() }
       : t
     ));
     queueMicrotask(() => { isSwitchingRef.current = false; });
@@ -486,7 +495,7 @@ export function ArchiveAgent({ locale, onSetLocale }: ArchiveAgentProps) {
         const isUser = m.role === "user";
         const isFresh = !isUser && m.id === freshIdRef.current && !revealedIds.has(m.id);
         const isStillStreaming = isFresh && (status === "streaming" || status === "submitted");
-        const shouldReveal = isFresh && !isStillStreaming;
+        const justArrived = isFresh && !isStillStreaming;
         return (
           <div key={m.id} className="archive-agent__turn" data-role={m.role}>
             <span className="archive-agent__glyph">{isUser ? "◇" : "◆"}</span>
@@ -515,23 +524,21 @@ export function ArchiveAgent({ locale, onSetLocale }: ArchiveAgentProps) {
               {text && !isStillStreaming && (
                 isUser ? (
                   <div className="archive-agent__text">{text}</div>
-                ) : shouldReveal ? (
-                  <div className="archive-agent__text" data-revealing="true">
-                    <ScrambleReveal
-                      text={text}
-                      onDone={() => {
-                        setRevealedIds((prev) => {
-                          if (prev.has(m.id)) return prev;
-                          const next = new Set(prev);
-                          next.add(m.id);
-                          return next;
-                        });
-                        if (freshIdRef.current === m.id) freshIdRef.current = null;
-                      }}
-                    />
-                  </div>
                 ) : (
-                  <div className="archive-agent__text archive-agent__text--md">
+                  <div
+                    className="archive-agent__text archive-agent__text--md"
+                    data-reveal={justArrived ? "true" : undefined}
+                    onAnimationEnd={justArrived ? (e) => {
+                      if (e.animationName !== "archive-agent-text-reveal") return;
+                      setRevealedIds((prev) => {
+                        if (prev.has(m.id)) return prev;
+                        const next = new Set(prev);
+                        next.add(m.id);
+                        return next;
+                      });
+                      if (freshIdRef.current === m.id) freshIdRef.current = null;
+                    } : undefined}
+                  >
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm]}
                       components={{
@@ -551,7 +558,7 @@ export function ArchiveAgent({ locale, onSetLocale }: ArchiveAgentProps) {
           </div>
         );
       })}
-      {(status === "submitted" || status === "streaming") && (
+      {status === "submitted" && messages[messages.length - 1]?.role === "user" && (
         <div className="archive-agent__turn" data-role="assistant">
           <span className="archive-agent__glyph">◆</span>
           <div className="archive-agent__body">

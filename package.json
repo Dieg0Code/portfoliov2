@@ -13,14 +13,17 @@
     "micro:next": "node scripts/micrographics/next.mjs",
     "micro:claim": "node scripts/micrographics/claim.mjs",
     "micro:mark": "node scripts/micrographics/mark.mjs",
-    "micro:report": "node scripts/micrographics/report.mjs"
+    "micro:report": "node scripts/micrographics/report.mjs",
+    "embed:kb": "tsx scripts/embed-kb.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.53",
     "@ai-sdk/react": "^3.0.170",
     "@chenglou/pretext": "^0.0.3",
+    "@supabase/supabase-js": "^2.104.1",
     "ai": "^6.0.168",
     "gray-matter": "^4.0.3",
+    "js-tiktoken": "^1.0.21",
     "mermaid": "^11.14.0",
     "motion": "^12.38.0",
     "next": "latest",
@@ -38,8 +41,10 @@
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
+    "dotenv": "^17.4.2",
     "eslint": "latest",
     "eslint-config-next": "latest",
+    "tsx": "^4.21.0",
     "typescript": "latest"
   }
 }

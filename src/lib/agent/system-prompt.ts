@@ -3,6 +3,40 @@ import path from "node:path";
 import { contactEmail, githubProfile, homeContent } from "@/components/home/content";
 import type { PostMeta } from "@/lib/blog/types";
 import { formatGitHubBlock, getGitHubContext } from "./github-context";
+import { renderKBBlock } from "./prompt/blocks";
+import type { KBHit } from "./memory/retrieve";
+
+type BuildArgs = {
+  posts: PostMeta[];
+  priorSummary?: string;
+  kbHits?: KBHit[];
+  osintBlock?: string;
+};
+
+const DIEGO_LOCATION = "Osorno, Chile";
+const DIEGO_TZ = "America/Santiago"; // CL national TZ; UTC-3 in summer, UTC-4 winter
+const CAREER_START_YEAR = 2018;
+
+function renderNowBlock(): string {
+  const now = new Date();
+  const date = new Intl.DateTimeFormat("es-CL", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric"
+  }).format(now);
+  const time = new Intl.DateTimeFormat("es-CL", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: DIEGO_TZ,
+    timeZoneName: "shortOffset"
+  }).format(now);
+  const years = now.getUTCFullYear() - CAREER_START_YEAR;
+  return `## Ahora (real, no inventes)
+fecha: ${date} · ${time} en ${DIEGO_LOCATION} (Diego)
+experiencia Diego: ${years} años (desde ${CAREER_START_YEAR})`;
+}
 
 const AGENT_MD_PATH = path.join(process.cwd(), "content", "agent.md");
 
@@ -20,13 +54,14 @@ function readAgentMarkdown(): string {
   }
 }
 
-export function buildSystemPrompt(posts: PostMeta[]): string {
+export function buildSystemPrompt(args: BuildArgs): string {
+  const { posts, priorSummary, kbHits, osintBlock } = args;
   const es = homeContent.es;
   const projectLines = es.work.projects
     .map((p) => `  - ${p.title}: ${p.summary} [href=${p.href}${p.isExperiment ? " · experimento" : ""}]`)
     .join("\n");
-  const postLines = posts
-    .slice(0, 20)
+  const postIndexLines = posts
+    .slice(0, 12)
     .map((p) => `  - /blog/${p.slug}: ${p.title}`)
     .join("\n");
 
@@ -36,42 +71,41 @@ export function buildSystemPrompt(posts: PostMeta[]): string {
   const ghCtx = getGitHubContext();
   const ghBlock = ghCtx ? `\n\n${formatGitHubBlock(ghCtx)}` : "";
 
-  return `${persona}# Datos dinámicos (esto sale de content.ts, /posts y la API de GitHub — no lo edites en el .md)
+  const summaryBlock = priorSummary && priorSummary.trim()
+    ? `## Resumen de la conversación previa
+(Mira recuerda esto aunque los turnos antiguos ya no estén en la ventana.)
 
-## Stack real de Diego (no generalista — verticales profundas)
-- Backend Go: producción + SDK propio (syndicate-go). Es su lenguaje base.
-- Python: ML/RL desde cero (ataxx-zero, NanoLogicLM con PyTorch) y FastAPI cuando el caso lo pide.
-- Cloud serverless: AWS Lambda + Terraform (IaC) + GitHub Actions. Ha desplegado pipelines completos con escaneo de vulnerabilidades.
-- IA aplicada: RAG sobre pgvector, agentes con embeddings, integraciones reales (WhatsApp, mobile).
-- Frontend React: Next.js para web (este portfolio incluido) y Expo para mobile (pia-app). El núcleo es React — eso cubre web y móvil con la misma cabeza, no son dos stacks distintos.
-- Java y TypeScript también, pero el peso está en Go + Python + React.
-- Docencia AIEP: 4 asignaturas activas, no docencia adyacente — la usa para ordenar pensamiento.
-
-No es "fullstack que sabe un poco de todo". Es backend Go + cloud serverless +
-IA aplicada + React (web/mobile), con docencia como quinta vertical. Si te tiran
-"maestro de nada", responde con evidencia concreta, no defensiva: nombra
-proyecto + qué resuelve + stack.
-
-## Contacto
-- ${es.brand.name} — ${es.brand.strapline}
-- Email: ${contactEmail}
-- GitHub: ${githubProfile}
-
-## Proyectos destacados
-${projectLines}
-
-## Posts del blog disponibles
-${postLines || "  (ninguno todavía)"}
-
-## Tools disponibles
-- navigate({ section }) — top | work | notes | contact
-- setLocale({ locale }) — es | en
-- openPost({ slug }) — usa solo slugs listados arriba
-- openExternal({ target }) — github | email | blog
-- listProjects() — devuelve la lista completa estructurada
-${ghBlock}
+${priorSummary.trim()}
 
 ---
 
-_La persona y reglas vienen de \`content/agent.md\`. Datos dinámicos: \`src/components/home/content.ts\`, posts del blog, y API pública de GitHub (cache 1h)._`;
+`
+    : "";
+
+  const kbBlock = kbHits && kbHits.length > 0
+    ? `${renderKBBlock(kbHits)}\n\n---\n\n`
+    : "";
+
+  const osintSection = osintBlock
+    ? `${osintBlock}\n\n---\n\n`
+    : "";
+
+  const nowBlock = renderNowBlock();
+
+  return `${persona}${summaryBlock}${osintSection}${kbBlock}# Datos dinámicos
+
+${nowBlock}
+
+## Contacto
+${es.brand.name} — ${es.brand.strapline} · ${contactEmail} · ${githubProfile}
+
+## Proyectos (índice — detalle profundo viene por KB retrieval)
+${projectLines}
+
+## Posts disponibles (slugs para openPost · contenido profundo via KB)
+${postIndexLines || "  (ninguno todavía)"}
+
+## Tools
+navigate{section: top|work|notes|contact} · setLocale{locale: es|en} · openPost{slug} · openExternal{target: github|email|blog} · listProjects()
+${ghBlock}`;
 }
