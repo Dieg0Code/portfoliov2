@@ -5,6 +5,7 @@ import { SiteHeader } from "@/components/shared/site-header";
 import { PostHeader } from "@/components/blog/post-header";
 import { PostFooter } from "@/components/blog/post-footer";
 import { mdxComponents } from "@/components/blog/mdx-components";
+import { ScrollProgressRail } from "@/components/home/scroll-progress-rail";
 import { getAllPostMeta, getPostBySlug } from "@/lib/blog/posts";
 import { mdxOptions } from "@/lib/blog/mdx-config";
 
@@ -61,6 +62,8 @@ export default async function BlogPostPage({ params }: PageProps) {
         </div>
         <PostFooter prev={prev} next={next} locale={post.meta.locale} />
       </article>
+
+      <ScrollProgressRail />
     </main>
   );
 }

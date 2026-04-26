@@ -1840,7 +1840,6 @@ h3 {
   opacity: 0;
   transform: translate3d(18px, 0, 0);
   transform-origin: center;
-  will-change: transform;
   transition:
     opacity var(--motion-slow) var(--ease-entrance),
     transform var(--motion-slow) var(--ease-entrance);
@@ -5322,6 +5321,9 @@ h3 {
   display: flex;
   flex-direction: column;
   gap: 2.4rem;
+  max-width: 72ch;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .blog-post__header {
@@ -5533,6 +5535,23 @@ h3 {
   padding: 0 0.25rem;
 }
 
+/* rehype-pretty-code dual-theme activation. With `theme: { light, dark }`
+   shiki emits CSS vars per token; the site has to opt into one. Default
+   is light; switch to dark when the user prefers it. */
+.blog-prose pre,
+.blog-prose pre code,
+.blog-prose pre code span {
+  color: var(--shiki-light);
+}
+
+@media (prefers-color-scheme: dark) {
+  .blog-prose pre,
+  .blog-prose pre code,
+  .blog-prose pre code span {
+    color: var(--shiki-dark);
+  }
+}
+
 .blog-prose figure[data-rehype-pretty-code-figure] {
   margin: 1.4rem 0;
 }
@@ -5661,6 +5680,45 @@ h3 {
 .blog-mermaid__svg svg {
   max-width: 100%;
   height: auto;
+}
+
+/* Archive Aesthetic on Mermaid: rectangular nodes, bone/ink palette,
+   no rounded corners. Overrides the neutral theme defaults. */
+.blog-mermaid__svg svg .node rect,
+.blog-mermaid__svg svg .node polygon,
+.blog-mermaid__svg svg .cluster rect {
+  fill: var(--surface) !important;
+  stroke: var(--ink) !important;
+  stroke-width: 1px !important;
+  rx: 0 !important;
+  ry: 0 !important;
+}
+
+.blog-mermaid__svg svg .node circle,
+.blog-mermaid__svg svg .node ellipse {
+  fill: var(--surface) !important;
+  stroke: var(--ink) !important;
+  stroke-width: 1px !important;
+}
+
+.blog-mermaid__svg svg .edgePath path,
+.blog-mermaid__svg svg .flowchart-link {
+  stroke: var(--ink) !important;
+  stroke-width: 1.2px !important;
+}
+
+.blog-mermaid__svg svg .arrowheadPath,
+.blog-mermaid__svg svg .marker {
+  fill: var(--ink) !important;
+  stroke: var(--ink) !important;
+}
+
+.blog-mermaid__svg svg .nodeLabel,
+.blog-mermaid__svg svg .edgeLabel,
+.blog-mermaid__svg svg foreignObject div {
+  color: var(--ink) !important;
+  background: transparent !important;
+  font-family: var(--font-mono) !important;
 }
 
 .blog-mermaid__placeholder {
