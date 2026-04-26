@@ -119,10 +119,16 @@ function buildProjectChunks(): PendingChunk[] {
   (["es", "en"] as const).forEach((locale) => {
     const projects = homeContent[locale].work.projects;
     projects.forEach((p) => {
+      const moduleLines = p.modules && p.modules.length > 0
+        ? `Módulos/asignaturas: ${p.modules
+            .map((m) => `${m.code} ${m.title}`)
+            .join("; ")}`
+        : "";
       const content = [
         `Título: ${p.title}`,
         p.kicker ? `Vertical: ${p.kicker}` : "",
         `Resumen: ${p.summary.replace(/\*\*/g, "")}`,
+        moduleLines,
         p.tags.length ? `Tags: ${p.tags.join(", ")}` : "",
         p.href ? `Enlace: ${p.href}` : "",
         p.isExperiment ? "Tipo: experimento" : "Tipo: proyecto destacado"

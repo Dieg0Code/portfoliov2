@@ -8,7 +8,9 @@ import {
   type UIMessage
 } from "ai";
 import { NextRequest } from "next/server";
-import { agentTools } from "@/lib/agent/tools";
+import { after } from "next/server";
+import { cookies } from "next/headers";
+import { buildAgentTools } from "@/lib/agent/tools";
 import { buildSystemPrompt } from "@/lib/agent/system-prompt";
 import { checkRateLimit } from "@/lib/agent/rate-limit";
 import { getAllPostMeta } from "@/lib/blog/posts";
@@ -18,32 +20,32 @@ import {
   estimateToolsTokens,
   trimByTokens
 } from "@/lib/agent/token-budget";
-import { summarizeTurns } from "@/lib/agent/summarize";
 import { embed } from "@/lib/agent/embeddings/client";
 import { hybridSearchKB, type KBHit } from "@/lib/agent/memory/retrieve";
 import { isSupabaseConfigured } from "@/lib/agent/memory/client";
 import { collectServerTelemetry } from "@/lib/agent/telemetry/collect";
 import { renderOsintBlock } from "@/lib/agent/telemetry/render";
 import type { ClientTelemetry } from "@/lib/agent/telemetry/types";
+import { resolveVisitor, serializeSetCookie } from "@/lib/agent/memory/visitor";
+import {
+  getOrCreateConversation,
+  appendMessage,
+  bumpConversationActivity
+} from "@/lib/agent/memory/conversation";
+import { summarizeIfNeeded } from "@/lib/agent/memory/summary-policy";
+import { getRecentVisitorFacts } from "@/lib/agent/memory/visitor-memory";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
 
 const MODEL_CONTEXT_LIMIT = 8000;
-// Mira's voice policy caps her at 3-6 lines for chat, 1-2 for tool confirms.
-// 800 tokens is more than enough for any single response and frees ~400
-// tokens for history vs the previous 1200.
 const RESERVED_OUTPUT_TOKENS = 800;
 const MIN_HISTORY_TOKENS = 300;
-// Headroom for the rolling summary block when it appears.
 const SUMMARY_HEADROOM_TOKENS = 200;
-
-type PriorSummary = { text: string; coversThroughId: string };
 
 type RequestBody = {
   messages: UIMessage[];
-  threadId?: string;
-  priorSummary?: PriorSummary;
+  conversationId?: string;
   locale?: "es" | "en";
   clientTelemetry?: ClientTelemetry;
 };
@@ -63,15 +65,11 @@ function extractTextFromParts(parts: unknown): string {
   return out;
 }
 
-function lastUserQuery(messages: UIMessage[]): string {
+function lastUserMessage(messages: UIMessage[]): UIMessage | null {
   for (let i = messages.length - 1; i >= 0; i--) {
-    if (messages[i].role !== "user") continue;
-    const text = extractTextFromParts(
-      (messages[i] as { parts?: unknown }).parts
-    ).trim();
-    if (text) return text;
+    if (messages[i].role === "user") return messages[i];
   }
-  return "";
+  return null;
 }
 
 const githubModels = createOpenAI({
@@ -98,8 +96,30 @@ export async function POST(req: NextRequest) {
 
   const body = (await req.json()) as RequestBody;
   const messages = body.messages ?? [];
-  const priorSummary = body.priorSummary;
   const locale = body.locale === "en" ? "en" : "es";
+
+  // Visitor identity. Cookie is created on first request and lives 180 days.
+  const cookieStore = await cookies();
+  const visitor = resolveVisitor(cookieStore);
+
+  // Conversation: server-side state. Falls back to creation if Supabase isn't
+  // configured or the lookup fails — agent must keep working.
+  const supabaseOn = isSupabaseConfigured();
+  let conversationId: string | null = null;
+  let priorSummary = "";
+  if (supabaseOn) {
+    try {
+      const conv = await getOrCreateConversation({
+        visitorId: visitor.id,
+        conversationId: body.conversationId,
+        locale
+      });
+      conversationId = conv.id;
+      priorSummary = conv.summary;
+    } catch (err) {
+      console.warn("[agent] conversation init failed, continuing stateless:", err);
+    }
+  }
 
   const posts = await getAllPostMeta();
 
@@ -109,12 +129,14 @@ export async function POST(req: NextRequest) {
   }));
   const turnNumber = countUserTurns(messages);
 
-  // Knowledge-base retrieval: embed the latest user query and hybrid-search.
-  // Silent failure path — if Supabase / embeddings are down we just proceed
-  // with an empty KB block. Never let retrieval block the chat.
+  // Visitor memory — top facts injected as a system block. Silent failure.
+  const visitorFactsPromise = getRecentVisitorFacts(visitor.id, 5).catch(() => []);
+
+  // Knowledge-base retrieval — silent failure path.
   let kbHits: KBHit[] = [];
-  const query = lastUserQuery(messages);
-  if (query && isSupabaseConfigured()) {
+  const lastUser = lastUserMessage(messages);
+  const query = extractTextFromParts((lastUser as { parts?: unknown } | null)?.parts).trim();
+  if (query && supabaseOn) {
     try {
       const queryEmbedding = await embed(query);
       kbHits = await hybridSearchKB({
@@ -128,105 +150,108 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const serverTelemetry = await serverTelemetryPromise;
+  const [serverTelemetry, visitorFacts] = await Promise.all([
+    serverTelemetryPromise,
+    visitorFactsPromise
+  ]);
   const osintBlock = renderOsintBlock(
     { client: body.clientTelemetry, server: serverTelemetry },
     turnNumber
   );
 
-  // Initial budget estimate with the summary + KB we were handed.
-  let activeSummary = priorSummary?.text;
-  let activeCoversThroughId = priorSummary?.coversThroughId;
-  let systemPrompt = buildSystemPrompt({
+  const systemPrompt = buildSystemPrompt({
     posts,
-    priorSummary: activeSummary,
+    priorSummary,
     kbHits,
-    osintBlock
+    osintBlock,
+    visitorFacts
   });
   const toolsTokens = estimateToolsTokens();
-
-  const computeBudget = (sys: string, reserveSummary: boolean) =>
+  const budget =
     MODEL_CONTEXT_LIMIT -
-    encodeTokens(sys) -
+    encodeTokens(systemPrompt) -
     toolsTokens -
     RESERVED_OUTPUT_TOKENS -
-    (reserveSummary ? SUMMARY_HEADROOM_TOKENS : 0);
+    SUMMARY_HEADROOM_TOKENS;
 
-  let budget = computeBudget(systemPrompt, true);
   if (budget < MIN_HISTORY_TOKENS) {
     const sysTok = encodeTokens(systemPrompt);
     console.warn(
       `[agent] 413 context_overflow: system=${sysTok}, tools=${toolsTokens}, ` +
-      `reserved=${RESERVED_OUTPUT_TOKENS}+${SUMMARY_HEADROOM_TOKENS}, ` +
       `budget=${budget} < min=${MIN_HISTORY_TOKENS}`
     );
     return Response.json(
-      { error: "context_overflow", reason: "system prompt too large", systemTokens: sysTok, budget },
+      { error: "context_overflow", systemTokens: sysTok, budget },
       { status: 413 }
     );
   }
 
-  const { window, evictedEnd } = trimByTokens(messages, budget);
-
-  // Determine which evicted turns are newer than what prior summary covers.
-  let newlyEvicted: UIMessage[] = [];
-  if (evictedEnd > 0) {
-    if (!activeCoversThroughId) {
-      newlyEvicted = messages.slice(0, evictedEnd);
-    } else {
-      const coverIdx = messages.findIndex((m) => m.id === activeCoversThroughId);
-      const startAt = coverIdx >= 0 ? coverIdx + 1 : 0;
-      newlyEvicted = messages.slice(startAt, evictedEnd);
-    }
-  }
-
-  let summaryChanged = false;
-  if (newlyEvicted.length > 0) {
-    const updated = await summarizeTurns(activeSummary ?? "", newlyEvicted);
-    if (updated && updated !== activeSummary) {
-      activeSummary = updated;
-      activeCoversThroughId = newlyEvicted[newlyEvicted.length - 1].id;
-      summaryChanged = true;
-      systemPrompt = buildSystemPrompt({
-        posts,
-        priorSummary: activeSummary,
-        kbHits,
-        osintBlock
-      });
-      // after updating the summary, reserveSummary=false — headroom already
-      // spent — but validate we didn't blow past the cap.
-      budget = computeBudget(systemPrompt, false);
-      if (budget < MIN_HISTORY_TOKENS) {
-        return Response.json(
-          { error: "context_overflow", reason: "summary pushed system past budget" },
-          { status: 413 }
-        );
-      }
-    }
-  }
-
+  const { window } = trimByTokens(messages, budget);
   const cleanedWindow = dropOrphanToolResults(window);
 
   const stream = createUIMessageStream({
     execute: async ({ writer }) => {
-      if (summaryChanged && activeSummary && activeCoversThroughId) {
+      if (conversationId) {
         writer.write({
-          type: "data-summary",
-          data: { text: activeSummary, coversThroughId: activeCoversThroughId }
+          type: "data-conversation",
+          data: { id: conversationId }
         });
       }
+      const tools = buildAgentTools({
+        visitorId: visitor.id,
+        conversationId,
+        locale
+      });
       const result = streamText({
         model: githubModels.chat("gpt-4o-mini"),
         system: systemPrompt,
         messages: await convertToModelMessages(cleanedWindow),
-        tools: agentTools,
+        tools,
         stopWhen: stepCountIs(6),
-        temperature: 0.75,
-        maxOutputTokens: RESERVED_OUTPUT_TOKENS
+        temperature: 0.85,
+        maxOutputTokens: RESERVED_OUTPUT_TOKENS,
+        onFinish: ({ text }) => {
+          // Persist after the response is flushed. Order matters: user msg
+          // first, then assistant. We cannot build the final user msg parts
+          // here because the AI SDK only owns the assistant side, so we
+          // serialise from the request body.
+          if (!conversationId) return;
+          const cid = conversationId;
+          const userMsg = lastUser;
+          const assistantText = text;
+          after(async () => {
+            try {
+              if (userMsg) {
+                await appendMessage(cid, {
+                  role: "user",
+                  content: extractTextFromParts(
+                    (userMsg as { parts?: unknown }).parts
+                  ),
+                  parts: (userMsg as { parts?: unknown }).parts
+                });
+              }
+              if (assistantText && assistantText.trim()) {
+                await appendMessage(cid, {
+                  role: "assistant",
+                  content: assistantText,
+                  parts: [{ type: "text", text: assistantText }]
+                });
+              }
+              await bumpConversationActivity(cid, (userMsg ? 1 : 0) + (assistantText ? 1 : 0));
+              await summarizeIfNeeded(cid);
+            } catch (err) {
+              console.warn("[agent] post-stream persistence failed:", err);
+            }
+          });
+        }
       });
       writer.merge(result.toUIMessageStream());
     }
   });
 
-  return createUIMessageStreamResponse({ stream });
+  const response = createUIMessageStreamResponse({ stream });
+  if (visitor.setCookie) {
+    response.headers.append("Set-Cookie", serializeSetCookie(visitor.setCookie));
+  }
+  return response;
 }

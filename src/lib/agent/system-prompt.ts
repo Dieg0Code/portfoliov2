@@ -6,12 +6,22 @@ import { formatGitHubBlock, getGitHubContext } from "./github-context";
 import { renderKBBlock } from "./prompt/blocks";
 import type { KBHit } from "./memory/retrieve";
 
+import type { VisitorFact } from "./memory/visitor-memory";
+
 type BuildArgs = {
   posts: PostMeta[];
   priorSummary?: string;
   kbHits?: KBHit[];
   osintBlock?: string;
+  visitorFacts?: VisitorFact[];
 };
+
+function renderVisitorFactsBlock(facts: VisitorFact[]): string {
+  if (facts.length === 0) return "";
+  const lines = facts.map((f) => `- (${f.kind}) ${f.content}`);
+  return `## Sobre este visitante (memoria de Mira de sesiones previas)
+${lines.join("\n")}`;
+}
 
 const DIEGO_LOCATION = "Osorno, Chile";
 const DIEGO_TZ = "America/Santiago"; // CL national TZ; UTC-3 in summer, UTC-4 winter
@@ -55,7 +65,7 @@ function readAgentMarkdown(): string {
 }
 
 export function buildSystemPrompt(args: BuildArgs): string {
-  const { posts, priorSummary, kbHits, osintBlock } = args;
+  const { posts, priorSummary, kbHits, osintBlock, visitorFacts } = args;
   const es = homeContent.es;
   const projectLines = es.work.projects
     .map((p) => `  - ${p.title}: ${p.summary} [href=${p.href}${p.isExperiment ? " · experimento" : ""}]`)
@@ -90,9 +100,13 @@ ${priorSummary.trim()}
     ? `${osintBlock}\n\n---\n\n`
     : "";
 
+  const visitorBlock = visitorFacts && visitorFacts.length > 0
+    ? `${renderVisitorFactsBlock(visitorFacts)}\n\n---\n\n`
+    : "";
+
   const nowBlock = renderNowBlock();
 
-  return `${persona}${summaryBlock}${osintSection}${kbBlock}# Datos dinámicos
+  return `${persona}${summaryBlock}${visitorBlock}${osintSection}${kbBlock}# Datos dinámicos
 
 ${nowBlock}
 

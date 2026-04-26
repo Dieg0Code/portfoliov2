@@ -1,6 +1,6 @@
 import { getEncoding } from "js-tiktoken";
 import type { UIMessage } from "ai";
-import { agentTools } from "./tools";
+import { buildToolsForTokenCount } from "./tools";
 
 // cl100k_base is within ~5% of o200k_base on typical ES/EN prose — good
 // enough for budgeting and avoids shipping the larger o200k ranks file.
@@ -37,7 +37,7 @@ export function estimateMessageTokens(m: UIMessage): number {
 let cachedToolsTokens: number | null = null;
 export function estimateToolsTokens(): number {
   if (cachedToolsTokens !== null) return cachedToolsTokens;
-  const serialized = Object.entries(agentTools).map(([name, tool]) => {
+  const serialized = Object.entries(buildToolsForTokenCount()).map(([name, tool]) => {
     const t = tool as { description?: string; inputSchema?: unknown };
     return {
       name,

@@ -1840,6 +1840,7 @@ h3 {
   opacity: 0;
   transform: translate3d(18px, 0, 0);
   transform-origin: center;
+  will-change: transform;
   transition:
     opacity var(--motion-slow) var(--ease-entrance),
     transform var(--motion-slow) var(--ease-entrance);
@@ -3594,34 +3595,43 @@ h3 {
   }
 }
 
+.archive-agent__tools-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.35rem;
+}
+
 .archive-agent__tool {
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
   gap: 0.3rem;
+  padding: 0.12rem 0.45rem;
   font-family: var(--font-mono);
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   letter-spacing: 0.04em;
-  color: color-mix(in oklab, #fcf9f1 70%, transparent);
-  margin-bottom: 0.2rem;
+  background: color-mix(in oklab, var(--accent) 12%, transparent);
+  color: color-mix(in oklab, var(--accent) 85%, #fcf9f1);
+  cursor: help;
+  transition: background 160ms ease;
+}
+
+.archive-agent__tool:hover {
+  background: color-mix(in oklab, var(--accent) 22%, transparent);
 }
 
 .archive-agent__tool-glyph {
   color: var(--accent);
-  opacity: 0.85;
-}
-
-.archive-agent__tool-name {
-  color: var(--accent);
-  font-weight: 600;
-  letter-spacing: 0.02em;
-}
-
-.archive-agent__tool-paren {
-  color: color-mix(in oklab, #fcf9f1 35%, transparent);
+  font-size: 0.85rem;
+  line-height: 1;
 }
 
 .archive-agent__tool-arg {
-  color: color-mix(in oklab, #fcf9f1 80%, transparent);
+  color: color-mix(in oklab, #fcf9f1 75%, transparent);
+  max-width: 22ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ── Markdown rendering inside assistant messages ────────────────── */
@@ -4033,7 +4043,68 @@ h3 {
 .archive-agent__main .archive-agent__transcript {
   flex: 1;
   min-height: 0;
-  padding: 1rem 1.2rem;
+  padding: 0.5rem 0;
+  gap: 0;
+}
+
+/* Compact mode: hide eyebrow role label */
+.archive-agent__role {
+  display: none;
+}
+
+/* Fullscreen: each turn is its own delimited block — tonal stacking,
+   zero border-radius (Archive Aesthetic). */
+.archive-agent__main .archive-agent__turn {
+  position: relative;
+  grid-template-columns: 1.5rem minmax(0, 1fr);
+  padding: 0.85rem 1.4rem 0.95rem 1.1rem;
+  gap: 0.65rem;
+  transition: background 200ms ease;
+}
+
+.archive-agent__main .archive-agent__turn[data-role="user"] {
+  background: color-mix(in oklab, #fcf9f1 6%, transparent);
+}
+
+.archive-agent__main .archive-agent__turn[data-role="assistant"] {
+  background: color-mix(in oklab, var(--accent) 8%, transparent);
+  border-left: 2px solid color-mix(in oklab, var(--accent) 60%, transparent);
+  padding-left: calc(1.1rem - 2px);
+}
+
+.archive-agent__main .archive-agent__turn:hover {
+  background: color-mix(in oklab,
+    var(--accent) 10%,
+    color-mix(in oklab, #fcf9f1 5%, transparent));
+}
+
+.archive-agent__main .archive-agent__turn[data-role="user"]:hover {
+  background: color-mix(in oklab, #fcf9f1 9%, transparent);
+}
+
+/* Inline role label at top of body — unambiguous attribution, zero overlap */
+.archive-agent__main .archive-agent__role {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  margin-bottom: 0.45rem;
+  color: color-mix(in oklab, #fcf9f1 38%, transparent);
+}
+
+.archive-agent__main .archive-agent__role[data-role="assistant"] {
+  color: color-mix(in oklab, var(--accent) 80%, #fcf9f1);
+}
+
+/* Readability cap on long lines */
+.archive-agent__main .archive-agent__text {
+  max-width: 72ch;
+}
+
+/* Glyph aligns with eyebrow row, not with first content line */
+.archive-agent__main .archive-agent__glyph {
+  padding-top: 0.05rem;
 }
 
 .archive-agent__inline-dock {

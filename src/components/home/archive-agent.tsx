@@ -22,19 +22,17 @@ type ArchiveAgentProps = {
   onSetLocale: (next: HomeLocale) => void;
 };
 
-type ThreadSummary = { text: string; coversThroughId: string };
-
 type Thread = {
   id: string;
   title: string;
   createdAt: number;
   updatedAt: number;
   messages: UIMessage[];
-  summary?: ThreadSummary;
+  conversationId?: string;   // server-side conversation ref (Fase 2 substrate)
 };
 
-const STORAGE_KEY = "archive-agent-threads-v1";
-const ACTIVE_KEY = "archive-agent-active-v1";
+const STORAGE_KEY = "archive-agent-threads-v2";
+const ACTIVE_KEY = "archive-agent-active-v2";
 
 const SECTION_IDS: Record<string, string> = {
   top: "top",
@@ -78,9 +76,14 @@ function extractText(parts: unknown): string {
     .join("");
 }
 
-function extractToolLabels(parts: unknown): string[] {
+type ToolInvocation = {
+  name: string;
+  arg: string;
+};
+
+function extractToolInvocations(parts: unknown): ToolInvocation[] {
   if (!Array.isArray(parts)) return [];
-  const labels: string[] = [];
+  const out: ToolInvocation[] = [];
   for (const p of parts) {
     const part = p as { type?: string; state?: string; input?: Record<string, unknown> };
     if (typeof part.type !== "string") continue;
@@ -88,11 +91,27 @@ function extractToolLabels(parts: unknown): string[] {
     const name = part.type.replace(/^tool-/, "");
     const input = part.input ?? {};
     const arg = Object.values(input)[0];
-    const value = typeof arg === "string" ? arg : "";
-    labels.push(value ? `${name}(${value})` : name);
+    out.push({ name, arg: typeof arg === "string" ? arg : "" });
   }
-  return labels;
+  return out;
 }
+
+// Tool glyph map. UI tools show the arg (it's contextually meaningful: scroll
+// to "work", open post "slug-x"). Cognitive tools are opaque — only glyph,
+// no name and no arg, so visitors can't reverse-engineer Mira's capabilities
+// or attempt prompt injection against specific tool names.
+type ToolGlyphMeta = { icon: string; showArg: boolean; aria: string };
+const TOOL_GLYPHS: Record<string, ToolGlyphMeta> = {
+  navigate:               { icon: "↳", showArg: true,  aria: "scroll" },
+  openPost:               { icon: "▤", showArg: true,  aria: "open" },
+  openExternal:           { icon: "↗", showArg: true,  aria: "external" },
+  setLocale:              { icon: "⇄", showArg: true,  aria: "toggle" },
+  listProjects:           { icon: "≡", showArg: false, aria: "index" },
+  recall_kb:              { icon: "⌕", showArg: false, aria: "look up" },
+  recall_about_visitor:   { icon: "⊙", showArg: false, aria: "consult" },
+  remember_about_visitor: { icon: "◈", showArg: false, aria: "note" }
+};
+const FALLBACK_GLYPH: ToolGlyphMeta = { icon: "·", showArg: false, aria: "tool" };
 
 function deriveTitle(messages: UIMessage[], fallback: string): string {
   for (const m of messages) {
@@ -174,8 +193,7 @@ export function ArchiveAgent({ locale, onSetLocale }: ArchiveAgentProps) {
             body: {
               ...(body ?? {}),
               messages,
-              threadId: tid ?? undefined,
-              priorSummary: thread?.summary,
+              conversationId: thread?.conversationId,
               locale: localeRef.current,
               clientTelemetry: clientTelemetryRef.current ?? undefined
             }
@@ -188,20 +206,15 @@ export function ArchiveAgent({ locale, onSetLocale }: ArchiveAgentProps) {
   const chat = useChat({
     transport,
     onData: (part) => {
-      if (part.type !== "data-summary") return;
-      const data = (part as { data?: { text?: string; coversThroughId?: string } })
-        .data;
-      if (!data?.text || !data.coversThroughId) return;
+      if (part.type !== "data-conversation") return;
+      const data = (part as { data?: { id?: string } }).data;
+      if (!data?.id) return;
       const tid = activeThreadIdRef.current;
       if (!tid) return;
       setThreads((prev) =>
         prev.map((t) =>
-          t.id === tid
-            ? {
-                ...t,
-                summary: { text: data.text!, coversThroughId: data.coversThroughId! },
-                updatedAt: Date.now()
-              }
+          t.id === tid && t.conversationId !== data.id
+            ? { ...t, conversationId: data.id, updatedAt: Date.now() }
             : t
         )
       );
@@ -463,7 +476,7 @@ export function ArchiveAgent({ locale, onSetLocale }: ArchiveAgentProps) {
     isSwitchingRef.current = true;
     setMessages([]);
     setThreads((prev) => prev.map((t) => t.id === activeThreadId
-      ? { ...t, messages: [], summary: undefined, title: locale === "es" ? "nueva conversación" : "new conversation", updatedAt: Date.now() }
+      ? { ...t, messages: [], conversationId: undefined, title: locale === "es" ? "nueva conversación" : "new conversation", updatedAt: Date.now() }
       : t
     ));
     queueMicrotask(() => { isSwitchingRef.current = false; });
@@ -491,7 +504,7 @@ export function ArchiveAgent({ locale, onSetLocale }: ArchiveAgentProps) {
       )}
       {messages.map((m) => {
         const text = extractText((m as { parts?: unknown }).parts);
-        const tools = extractToolLabels((m as { parts?: unknown }).parts);
+        const tools = extractToolInvocations((m as { parts?: unknown }).parts);
         const isUser = m.role === "user";
         const isFresh = !isUser && m.id === freshIdRef.current && !revealedIds.has(m.id);
         const isStillStreaming = isFresh && (status === "streaming" || status === "submitted");
@@ -500,24 +513,33 @@ export function ArchiveAgent({ locale, onSetLocale }: ArchiveAgentProps) {
           <div key={m.id} className="archive-agent__turn" data-role={m.role}>
             <span className="archive-agent__glyph">{isUser ? "◇" : "◆"}</span>
             <div className="archive-agent__body">
-              {tools.map((label, i) => {
-                const m = label.match(/^([^(]+)(?:\((.*)\))?$/);
-                const name = m?.[1] ?? label;
-                const arg = m?.[2];
-                return (
-                  <div key={`t-${i}`} className="archive-agent__tool">
-                    <span className="archive-agent__tool-glyph">▸</span>
-                    <span className="archive-agent__tool-name">{name}</span>
-                    {arg && (
-                      <>
-                        <span className="archive-agent__tool-paren">(</span>
-                        <span className="archive-agent__tool-arg">{arg}</span>
-                        <span className="archive-agent__tool-paren">)</span>
-                      </>
-                    )}
-                  </div>
-                );
-              })}
+              <span
+                className="archive-agent__role"
+                data-role={m.role}
+                aria-hidden="true"
+              >
+                {isUser ? "you" : "mira"}
+              </span>
+              {tools.length > 0 && (
+                <div className="archive-agent__tools-row">
+                  {tools.map((tool, i) => {
+                    const meta = TOOL_GLYPHS[tool.name] ?? FALLBACK_GLYPH;
+                    return (
+                      <span
+                        key={`t-${i}`}
+                        className="archive-agent__tool"
+                        title={meta.aria}
+                        aria-label={meta.aria}
+                      >
+                        <span className="archive-agent__tool-glyph">{meta.icon}</span>
+                        {meta.showArg && tool.arg && (
+                          <span className="archive-agent__tool-arg">{tool.arg}</span>
+                        )}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
               {isStillStreaming && (
                 <AgentThinking locale={locale} />
               )}
