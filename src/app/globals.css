@@ -5511,16 +5511,17 @@ h3 {
   border: 1px solid var(--ghost-line);
 }
 
-/* Code blocks (rehype-pretty-code, keepBackground: false) */
+/* Code blocks — archive-dark theme, permanent dark surface for legibility
+   over the bone page background. Theme provides bg + per-token fg inline. */
 .blog-prose pre {
   font-family: var(--font-mono);
   font-size: 0.88rem;
-  line-height: 1.55;
+  line-height: 1.6;
   margin: 1.4rem 0;
   padding: 1.1rem 1.2rem;
-  background: var(--surface-container);
-  border: 1px solid var(--ghost-line);
+  border: 1px solid #2a2a32;
   overflow-x: auto;
+  color: #e8e3d4;
 }
 
 .blog-prose pre code {
@@ -5529,27 +5530,11 @@ h3 {
   border: none;
   padding: 0;
   display: grid;
+  color: inherit;
 }
 
 .blog-prose pre code [data-line] {
   padding: 0 0.25rem;
-}
-
-/* rehype-pretty-code dual-theme activation. With `theme: { light, dark }`
-   shiki emits CSS vars per token; the site has to opt into one. Default
-   is light; switch to dark when the user prefers it. */
-.blog-prose pre,
-.blog-prose pre code,
-.blog-prose pre code span {
-  color: var(--shiki-light);
-}
-
-@media (prefers-color-scheme: dark) {
-  .blog-prose pre,
-  .blog-prose pre code,
-  .blog-prose pre code span {
-    color: var(--shiki-dark);
-  }
 }
 
 .blog-prose figure[data-rehype-pretty-code-figure] {
@@ -5677,9 +5662,26 @@ h3 {
   justify-content: center;
 }
 
+.blog-mermaid__svg {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
 .blog-mermaid__svg svg {
+  width: 100%;
   max-width: 100%;
   height: auto;
+  min-height: 240px;
+  font-size: 17px;
+}
+
+.blog-mermaid__svg svg .nodeLabel,
+.blog-mermaid__svg svg .edgeLabel,
+.blog-mermaid__svg svg foreignObject div,
+.blog-mermaid__svg svg foreignObject span {
+  font-size: 16px !important;
+  line-height: 1.4 !important;
 }
 
 /* Archive Aesthetic on Mermaid: rectangular nodes, bone/ink palette,
@@ -5729,13 +5731,17 @@ h3 {
   text-align: center;
 }
 
-.blog-mermaid__error {
+.blog-prose pre.blog-mermaid__error,
+pre.blog-mermaid__error {
   font-family: var(--font-mono);
   font-size: 0.8rem;
-  color: #8a1a1a;
+  color: #b32d2d;
   background: var(--surface-container-low);
+  border: 1px solid #b32d2d;
   padding: 0.8rem;
+  margin: 0;
   overflow-x: auto;
+  white-space: pre-wrap;
 }
 
 .blog-mermaid__caption {

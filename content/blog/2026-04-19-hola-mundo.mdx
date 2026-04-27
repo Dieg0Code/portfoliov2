@@ -81,17 +81,16 @@ const hello: Post = { slug: "hola-mundo", locale: "es" };
 
 ## Diagrama Mermaid
 
-<Mermaid
-  chart={`graph LR
-    A[.mdx en disco] --> B[gray-matter]
-    B --> C[next-mdx-remote/rsc]
-    C --> D[remark-gfm]
-    C --> E[rehype-pretty-code]
-    D --> F[HTML renderizado]
-    E --> F
-    F --> G[Archive Aesthetic]`}
-  caption="Pipeline de un post desde el archivo al HTML final."
-/>
+```mermaid Pipeline de un post desde el archivo al HTML final.
+graph LR
+  A[.mdx en disco] --> B[gray-matter]
+  B --> C[next-mdx-remote/rsc]
+  C --> D[remark-gfm]
+  C --> E[rehype-pretty-code]
+  D --> F[HTML renderizado]
+  E --> F
+  F --> G[Archive Aesthetic]
+```
 
 ## Link interno
 
