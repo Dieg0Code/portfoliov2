@@ -8341,6 +8341,54 @@ body:has(.drawer-lab) {
     height: min(90vw, 50svh, 400px);
   }
 
+  /*
+    The board holds still on touch layouts.
+
+    Every piece that animates transform or opacity is promoted to its own
+    compositor layer for the duration, then dropped. A single Ataxx move
+    converts up to eight neighbours at once, so a busy board churns through
+    dozens of layers per move — and the damage scaled exactly with the piece
+    count: the fuller the board, the larger and more frequent the corruption.
+    Android hands back recycled texture memory under that pressure, which is
+    where the flat grey blocks and the smears of unrelated glyphs came from.
+
+    Capping the layer count is the fix. At ~30px a piece the ring and the
+    arrival hop were barely legible anyway; the board reads the same without
+    them, and it now reads the same on every move.
+  */
+  .arena-board > button.is-converted .arena-piece,
+  .arena-board > button.is-arrival--jump .arena-piece,
+  .arena-board > button.is-arrival--clone .arena-piece {
+    animation: none;
+  }
+
+  /* display, not animation:none — the ring should not exist at all here,
+     rather than sit around as an invisible box waiting to be composited. */
+  .arena-board > button.is-converted::before {
+    display: none;
+  }
+
+  .arena-piece,
+  .arena-board > button.is-legal::after {
+    transition: none;
+  }
+
+  /* A blurred shadow behind a circular mask is the most expensive thing to
+     raster on the board, and it is multiplied by every piece in play — the
+     same quantity that made the artefacts worse. The inset highlight costs
+     nothing (no blur radius) and carries the material on its own. */
+  .arena-piece {
+    box-shadow: inset 1px 1px 0 rgba(252, 249, 241, 0.34);
+  }
+
+  /* The value marker slides by animating `left`, so it relayouts on every
+     move — the same mistake the search sweep made, just smaller and one
+     panel below. It still lands on the right value, it just gets there
+     without the transition. */
+  .arena-telemetry__gauge i {
+    transition: none;
+  }
+
   .arena-stage {
     /* auto, not minmax(0,1fr): a 1fr row contributes nothing to the stage's
        intrinsic height, so the stage stayed short and the board spilled over
