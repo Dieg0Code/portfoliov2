@@ -102,6 +102,9 @@ const COPY = {
     loss: "DERROTA",
     draw: "EMPATE",
     restart: "Reiniciar partida",
+    restartShort: "REINICIAR",
+    versusHeuristic: "VS · IA",
+    versusModel: "VS · IA",
     newGame: "OTRA PARTIDA",
     savingMatch: "GUARDANDO…",
     unlockedNext: "DESBLOQUEASTE {label}",
@@ -183,6 +186,9 @@ const COPY = {
     loss: "DEFEAT",
     draw: "DRAW",
     restart: "Restart game",
+    restartShort: "RESTART",
+    versusHeuristic: "VS · AI",
+    versusModel: "VS · AI",
     newGame: "PLAY AGAIN",
     savingMatch: "SAVING…",
     unlockedNext: "YOU UNLOCKED {label}",
@@ -304,6 +310,7 @@ export function AtaxxArena({ locale }: { locale: Locale }) {
   const [ladderScrollProgress, setLadderScrollProgress] = useState(0);
   const [openFileId, setOpenFileId] = useState<string | null>(null);
   const arenaRef = useRef<HTMLDivElement>(null);
+  const ladderListRef = useRef<HTMLOListElement>(null);
   const fileScrollTopRef = useRef(0);
 
   useLayoutEffect(() => {
@@ -625,6 +632,19 @@ export function AtaxxArena({ locale }: { locale: Locale }) {
     resetGame();
   };
 
+  const seatRungInTray = (card: HTMLButtonElement) => {
+    const tray = ladderListRef.current;
+    if (!tray || tray.scrollWidth <= tray.clientWidth) return;
+
+    const left = card.offsetLeft - (tray.clientWidth - card.offsetWidth) / 2;
+    tray.scrollTo({
+      left,
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "auto"
+        : "smooth"
+    });
+  };
+
   const statusLabel = outcome
     ? outcome === "win"
       ? t.win
@@ -802,6 +822,7 @@ export function AtaxxArena({ locale }: { locale: Locale }) {
         </header>
 
         <ol
+          ref={ladderListRef}
           className="arena-ladder__list"
           onScroll={(event) => {
             const list = event.currentTarget;
@@ -853,7 +874,10 @@ export function AtaxxArena({ locale }: { locale: Locale }) {
                     isCleared ? "cleared" : isLocked ? "locked" : "open"
                   }
                   aria-current={isActive ? "true" : undefined}
-                  onClick={() => selectRung(entry)}
+                  onClick={(event) => {
+                    selectRung(entry);
+                    seatRungInTray(event.currentTarget);
+                  }}
                 >
                   <span className="arena-ladder__index">{entry.index}</span>
                   <ArenaRivalSigil
@@ -911,8 +935,18 @@ export function AtaxxArena({ locale }: { locale: Locale }) {
           <output className="arena-stage__status" aria-live="polite">
             {statusLabel}
           </output>
-          <span className="arena-stage__score arena-stage__score--rival">
-            <b>{rivalCount.toString().padStart(2, "0")}</b> {rung.label}
+          <span
+            className="arena-stage__opponent"
+            data-kind={rung.kind}
+            aria-label={`${
+              rung.kind === "model" ? t.versusModel : t.versusHeuristic
+            } ${rung.label}, ${rivalCount}`}
+          >
+            <small>
+              {rung.kind === "model" ? t.versusModel : t.versusHeuristic}
+            </small>
+            <strong>{rung.label}</strong>
+            <b>{rivalCount.toString().padStart(2, "0")}</b>
           </span>
         </header>
 
@@ -1106,7 +1140,10 @@ export function AtaxxArena({ locale }: { locale: Locale }) {
             aria-label={t.restart}
             title={t.restart}
           >
-            <RestartIcon />
+            <span className="arena-stage__restart-label">{t.restartShort}</span>
+            <i className="arena-stage__restart-mark" aria-hidden="true">
+              <RestartIcon />
+            </i>
           </button>
         </footer>
 
