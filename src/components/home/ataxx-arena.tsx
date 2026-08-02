@@ -112,6 +112,7 @@ const COPY = {
     unlockedNext: "DESBLOQUEASTE {label}",
     fallbackNotice: "Rival caído: sigue la heurística HARD",
     standingsTitle: "TABLA",
+    dossierViews: "Vistas del expediente",
     standingsEmpty: "Nadie ha jugado todavía.",
     standingsPlayer: "JUGADOR",
     standingsReached: "LLEGÓ A",
@@ -196,6 +197,7 @@ const COPY = {
     unlockedNext: "YOU UNLOCKED {label}",
     fallbackNotice: "Rival down: the HARD heuristic is standing in",
     standingsTitle: "STANDINGS",
+    dossierViews: "Dossier views",
     standingsEmpty: "Nobody has played yet.",
     standingsPlayer: "PLAYER",
     standingsReached: "REACHED",
@@ -1266,17 +1268,48 @@ export function AtaxxArena({ locale }: { locale: Locale }) {
           </button>
         </div>
 
-        <button
-          type="button"
-          className="arena-dossier__toggle"
-          aria-pressed={showStandings}
-          onClick={() => setShowStandings((current) => !current)}
+        {/*
+          Two tabs, not one toggle. As a lone word of orange text with no
+          border and no background, the control read as a label on a phone —
+          nothing about it said it could be touched, and its meaning flipped
+          depending on where you already were.
+        */}
+        <div
+          className="arena-dossier__views"
+          role="tablist"
+          aria-label={t.dossierViews}
         >
-          {showStandings ? t.ladderTitle : t.standingsTitle}
-        </button>
+          <button
+            type="button"
+            role="tab"
+            id="arena-view-rung"
+            aria-selected={!showStandings}
+            aria-controls="arena-panel-rung"
+            tabIndex={showStandings ? -1 : 0}
+            onClick={() => setShowStandings(false)}
+          >
+            {rung.label}
+          </button>
+          <button
+            type="button"
+            role="tab"
+            id="arena-view-standings"
+            aria-selected={showStandings}
+            aria-controls="arena-panel-standings"
+            tabIndex={showStandings ? 0 : -1}
+            onClick={() => setShowStandings(true)}
+          >
+            {t.standingsTitle}
+          </button>
+        </div>
 
         {showStandings ? (
-          <div className="arena-standings">
+          <div
+            className="arena-standings"
+            role="tabpanel"
+            id="arena-panel-standings"
+            aria-labelledby="arena-view-standings"
+          >
             {standings && standings.length > 0 ? (
               <table>
                 <thead>
@@ -1303,7 +1336,13 @@ export function AtaxxArena({ locale }: { locale: Locale }) {
             )}
           </div>
         ) : (
-          <article className="arena-dossier__rung" key={rung.id}>
+          <article
+            className="arena-dossier__rung"
+            key={rung.id}
+            role="tabpanel"
+            id="arena-panel-rung"
+            aria-labelledby="arena-view-rung"
+          >
             <header>
               <span>{rung.era}</span>
               <h3>{rung.label}</h3>
