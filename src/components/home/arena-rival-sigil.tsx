@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 import type { Rung } from "@/lib/ataxx/ladder";
 
 type ArenaRivalSigilProps = {
@@ -14,11 +16,7 @@ function signatureSeed(value: string) {
 }
 
 /** A literal type mark: decision tree for rules, layered network for models. */
-export function ArenaRivalSigil({
-  id,
-  kind,
-  strength = 0
-}: ArenaRivalSigilProps) {
+function RivalSigil({ id, kind, strength = 0 }: ArenaRivalSigilProps) {
   const seed = signatureSeed(id);
 
   if (kind === "heuristic") {
@@ -143,3 +141,11 @@ export function ArenaRivalSigil({
     </svg>
   );
 }
+
+/*
+  Memoised because the ladder holds twenty-two of these, each one a full SVG,
+  and every one of them was re-rendering on every board move, every telemetry
+  tick and every scroll frame. The props are three primitives fixed per rung,
+  so the comparison always short-circuits after the first paint.
+*/
+export const ArenaRivalSigil = memo(RivalSigil);

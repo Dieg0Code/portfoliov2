@@ -6702,7 +6702,10 @@ body:has(.drawer-lab) {
   border-block: 2px solid var(--plate-paper-deep);
   background: var(--plate-machine);
   box-shadow: inset 2px 0 0 var(--plate-oxide);
-  transition: top 80ms linear;
+  /* No transition on `top`. The position is now written once per animation
+     frame from the scroll handler, so easing it only added lag on top of a
+     value that is already frame-accurate — and animating `top` relayouts the
+     rail on every one of those frames. */
 }
 
 .arena-ladder__group-start {
@@ -6774,11 +6777,15 @@ body:has(.drawer-lab) {
   z-index: 0;
   top: 0;
   left: 0;
-  width: calc(var(--arena-rung-progress, 0) * 100%);
+  /* Scaled, not resized. Growing this by `width` relayouts the card — and the
+     card is one of twenty-two in a flex tray, so the tray goes with it. */
+  width: 100%;
   height: 100%;
+  transform: scaleX(var(--arena-rung-progress, 0));
+  transform-origin: 0 50%;
   background: color-mix(in srgb, var(--plate-oxide) 12%, transparent);
   content: "";
-  transition: width 320ms cubic-bezier(0.2, 0.78, 0.16, 1);
+  transition: transform 320ms cubic-bezier(0.2, 0.78, 0.16, 1);
 }
 
 .arena-ladder__list button > * {
@@ -7243,15 +7250,35 @@ body:has(.drawer-lab) {
   transition: transform 150ms cubic-bezier(0.2, 0.78, 0.16, 1);
 }
 
-.arena-board > button.is-legal:hover,
 .arena-board > button.is-legal:focus-visible {
   background: color-mix(in srgb, var(--plate-oxide) 11%, var(--plate-paper-deep));
   outline: 0;
 }
 
-.arena-board > button.is-legal:hover::after,
 .arena-board > button.is-legal:focus-visible::after {
   transform: scale(1.35);
+}
+
+/*
+  Hover is for devices that have one. A tap on a touchscreen leaves :hover
+  stuck on the cell until you touch somewhere else, so on a phone this used to
+  pin a scaled transform — and the compositor layer that comes with it — onto
+  a board cell for as long as you were thinking about your next move. The
+  focus-visible half above is unconditional; keyboard play is unaffected.
+*/
+@media (hover: hover) {
+  .arena-board > button.is-legal:hover {
+    background: color-mix(
+      in srgb,
+      var(--plate-oxide) 11%,
+      var(--plate-paper-deep)
+    );
+    outline: 0;
+  }
+
+  .arena-board > button.is-legal:hover::after {
+    transform: scale(1.35);
+  }
 }
 
 .arena-piece {
@@ -7439,8 +7466,12 @@ body:has(.drawer-lab) {
   opacity: 0.82;
 }
 
-.arena-result-strip:hover {
-  filter: brightness(0.96) saturate(1.08);
+/* A stuck :hover after a tap would leave a filter applied indefinitely, and a
+   filter is a render surface for as long as it lasts. */
+@media (hover: hover) {
+  .arena-result-strip:hover {
+    filter: brightness(0.96) saturate(1.08);
+  }
 }
 
 .arena-result-strip:focus-visible {
@@ -7544,23 +7575,30 @@ body:has(.drawer-lab) {
   height: 0;
 }
 
+/*
+  The seat used to carry a hard-edged offset shadow through its keyframes
+  (-10px 12px, no blur). Two problems, one visible and one not. Visibly, on a
+  phone the dossier is a full-width panel, so that shadow is a large solid
+  rectangle that appears beside it and vanishes — the flash reported when
+  switching rungs. Invisibly, box-shadow is a paint property: animating it
+  repaints the panel every frame, where transform and opacity alone stay on
+  the compositor. The card still lands the same way; it just no longer throws
+  a slab of colour while doing it.
+*/
 @keyframes arena-dossier-seat {
   0% {
     opacity: 0.74;
     transform: translate3d(16px, -3px, 0) rotate(0.6deg);
-    box-shadow: -10px 12px 0 color-mix(in srgb, var(--plate-machine) 15%, transparent);
   }
 
   68% {
     opacity: 1;
     transform: translate3d(-2px, 1px, 0) rotate(-0.08deg);
-    box-shadow: -3px 4px 0 color-mix(in srgb, var(--plate-machine) 8%, transparent);
   }
 
   100% {
     opacity: 1;
     transform: translate3d(0, 0, 0) rotate(0);
-    box-shadow: none;
   }
 }
 
@@ -7646,9 +7684,10 @@ body:has(.drawer-lab) {
 
 .arena-dossier__unlock > i > b {
   position: absolute;
-  inset: 0 auto 0 0;
+  inset: 0;
+  transform-origin: 0 50%;
   background: var(--plate-oxide);
-  transition: width 320ms cubic-bezier(0.2, 0.78, 0.16, 1);
+  transition: transform 320ms cubic-bezier(0.2, 0.78, 0.16, 1);
 }
 
 .arena-dossier__unlock[data-complete="true"] {
@@ -8154,19 +8193,25 @@ body:has(.drawer-lab) {
 /* How the engine rates the position, from your side to its side. */
 .arena-telemetry__gauge {
   position: relative;
-  width: clamp(46px, 9vw, 92px);
+  /* Named so the marker can travel the track's width as a transform. */
+  --arena-gauge-width: clamp(46px, 9vw, 92px);
+  width: var(--arena-gauge-width);
   height: 3px;
   background: color-mix(in srgb, var(--plate-ink) 14%, transparent);
 }
 
+/* Slides on transform, not on `left`. A percentage translate would resolve
+   against the marker's own 2px, so the travel is expressed against the track
+   width instead. Same movement, no relayout per frame. */
 .arena-telemetry__gauge i {
   position: absolute;
   top: -2px;
-  left: calc(var(--arena-value, 0.5) * 100%);
+  left: 0;
   width: 2px;
   height: 7px;
   background: var(--plate-machine);
-  transition: left 420ms cubic-bezier(0.2, 0.78, 0.16, 1);
+  transform: translateX(calc(var(--arena-value, 0.5) * var(--arena-gauge-width)));
+  transition: transform 420ms cubic-bezier(0.2, 0.78, 0.16, 1);
 }
 
 /* --- ladder spine --------------------------------------------------------- */
@@ -8359,13 +8404,6 @@ body:has(.drawer-lab) {
     height: min(90vw, 50svh, 400px);
   }
 
-  /* The value marker slides by animating `left`, so it relayouts on every
-     move — the same mistake the search sweep made, just smaller and one
-     panel below. It still lands on the right value, it just gets there
-     without the transition. */
-  .arena-telemetry__gauge i {
-    transition: none;
-  }
 
   .arena-stage {
     /* auto, not minmax(0,1fr): a 1fr row contributes nothing to the stage's

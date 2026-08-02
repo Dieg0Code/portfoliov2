@@ -8,7 +8,8 @@ import {
   useRef,
   useState,
   type CSSProperties,
-  type FormEvent
+  type FormEvent,
+  type UIEvent
 } from "react";
 import {
   AtaxxBoard,
@@ -307,10 +308,11 @@ export function AtaxxArena({ locale }: { locale: Locale }) {
   const restartButtonRef = useRef<HTMLButtonElement>(null);
   const [showStandings, setShowStandings] = useState(false);
   const [standings, setStandings] = useState<Standing[] | null>(null);
-  const [ladderScrollProgress, setLadderScrollProgress] = useState(0);
   const [openFileId, setOpenFileId] = useState<string | null>(null);
   const arenaRef = useRef<HTMLDivElement>(null);
   const ladderListRef = useRef<HTMLOListElement>(null);
+  const ladderRailRef = useRef<HTMLSpanElement>(null);
+  const ladderRailFrameRef = useRef<number | null>(null);
   const fileScrollTopRef = useRef(0);
 
   useLayoutEffect(() => {
@@ -645,6 +647,54 @@ export function AtaxxArena({ locale }: { locale: Locale }) {
     });
   };
 
+  /*
+    The rail position used to live in React state, so every scroll event
+    re-rendered the entire arena — twenty-two rung cards with their SVG
+    sigils, all forty-nine board cells, the dossier. Tapping a rung made that
+    worse rather than better: seatRungInTray smooth-scrolls the tray, and a
+    smooth scroll is a stream of scroll events, so one tap meant a re-render
+    on every frame of the glide, on top of the panel animations already
+    running. That is the flicker.
+
+    The rail is one custom property on one element that React never needs to
+    know about, so it is written straight to the node, coalesced to one write
+    per frame. On touch layouts the rail is display:none and this costs
+    nothing at all.
+  */
+  const handleLadderScroll = useCallback(
+    (event: UIEvent<HTMLOListElement>) => {
+      const list = event.currentTarget;
+      if (ladderRailFrameRef.current !== null) return;
+
+      ladderRailFrameRef.current = requestAnimationFrame(() => {
+        ladderRailFrameRef.current = null;
+        const rail = ladderRailRef.current;
+        if (!rail) return;
+
+        const horizontalMax = list.scrollWidth - list.clientWidth;
+        const verticalMax = list.scrollHeight - list.clientHeight;
+        const isHorizontal = horizontalMax > 1;
+        const maximum = isHorizontal ? horizontalMax : verticalMax;
+        const offset = isHorizontal ? list.scrollLeft : list.scrollTop;
+
+        rail.style.setProperty(
+          "--arena-ladder-scroll",
+          String(maximum > 0 ? offset / maximum : 0)
+        );
+      });
+    },
+    []
+  );
+
+  useEffect(
+    () => () => {
+      if (ladderRailFrameRef.current !== null) {
+        cancelAnimationFrame(ladderRailFrameRef.current);
+      }
+    },
+    []
+  );
+
   const statusLabel = outcome
     ? outcome === "win"
       ? t.win
@@ -824,15 +874,7 @@ export function AtaxxArena({ locale }: { locale: Locale }) {
         <ol
           ref={ladderListRef}
           className="arena-ladder__list"
-          onScroll={(event) => {
-            const list = event.currentTarget;
-            const horizontalMax = list.scrollWidth - list.clientWidth;
-            const verticalMax = list.scrollHeight - list.clientHeight;
-            const isHorizontal = horizontalMax > 1;
-            const maximum = isHorizontal ? horizontalMax : verticalMax;
-            const offset = isHorizontal ? list.scrollLeft : list.scrollTop;
-            setLadderScrollProgress(maximum > 0 ? offset / maximum : 0);
-          }}
+          onScroll={handleLadderScroll}
         >
           {LADDER.map((entry, index) => {
             const entryWins = wins[entry.id] ?? 0;
@@ -908,12 +950,8 @@ export function AtaxxArena({ locale }: { locale: Locale }) {
         </ol>
 
         <span
+          ref={ladderRailRef}
           className="arena-ladder__scroll-rail"
-          style={
-            {
-              "--arena-ladder-scroll": ladderScrollProgress
-            } as CSSProperties
-          }
           aria-hidden="true"
         >
           <i />
@@ -1223,7 +1261,7 @@ export function AtaxxArena({ locale }: { locale: Locale }) {
                     : `${nextRung.label} · ${t.unlockedShort}`}
                 </strong>
                 <i aria-hidden="true">
-                  <b style={{ width: `${rungProgress * 100}%` }} />
+                  <b style={{ transform: `scaleX(${rungProgress})` }} />
                 </i>
               </div>
             ) : null}
