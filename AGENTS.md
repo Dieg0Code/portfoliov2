@@ -29,6 +29,14 @@ This repo is a `Next.js` + `TypeScript` portfolio with a custom micrographics sy
 - Use `Components Library` for decorative primitives, dividers, frames, badges, and diagrams.
 - Use the naming maps in `docs/component-library-name-map.md` and `docs/editable-text-name-map.md` as the source of truth.
 
+## Card Motion Language
+
+- Treat cards throughout the portfolio as one coherent deck. Their movement vocabulary comes from close-up card magic: deal, turn over, cut, fan, spread, collect, and controlled shuffle.
+- Keep the objects technical and editorial rather than casino- or tarot-themed. The magic belongs in the physical timing, stacking, pivots, shadows, and hand-like trajectories.
+- Give every move a cause and a destination. A card should leave a visible packet, travel through a short readable arc, and settle with weight; avoid generic floating, bouncing, or unrelated ambient motion.
+- Reuse the Ataxx card flip as the canonical turn-over gesture. New card interactions should extend the same physical family instead of introducing unrelated transitions.
+- Preserve keyboard control, visible focus, touch targets, and a static `prefers-reduced-motion` state for every card mechanism.
+
 ## Commands
 
 - `npm run dev`: start the app.

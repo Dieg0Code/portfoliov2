@@ -1,0 +1,35 @@
+name: Supabase keepalive
+
+on:
+  schedule:
+    - cron: "17 2,10,18 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supabase-keepalive
+  cancel-in-progress: true
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Query the public heartbeat row
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "$SUPABASE_URL"
+          test -n "$SUPABASE_PUBLISHABLE_KEY"
+          curl \
+            --fail \
+            --silent \
+            --show-error \
+            --retry 3 \
+            --max-time 20 \
+            "$SUPABASE_URL/rest/v1/portfolio_keepalive?select=id&limit=1" \
+            --header "apikey: $SUPABASE_PUBLISHABLE_KEY"

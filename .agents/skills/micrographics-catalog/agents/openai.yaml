@@ -1,0 +1,4 @@
+interface:
+  display_name: "Micrographics Catalog"
+  short_description: "Select and implement repo micrographics"
+  default_prompt: "Use $micrographics-catalog to choose the right micrographics assets for this portfolio and plan their implementation."

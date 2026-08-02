@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./mechanical-drawer.css";
 
 export const metadata: Metadata = {
-  title: "Diego Obando | Software Developer and Technical Instructor",
+  title: "Diego Obando | Programación y docencia",
   description:
-    "Problem-solving across fullstack delivery, applied AI, LLM integrations, RAG, agents, and technical teaching.",
+    "Portfolio de Diego Obando: programación, sistemas, herramientas y docencia técnica.",
   icons: {
     icon: "/icon.svg",
     shortcut: "/icon.svg",
@@ -18,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
       <body suppressHydrationWarning>{children}</body>
     </html>
   );

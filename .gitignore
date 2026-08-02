@@ -18,3 +18,9 @@ __MACOSX/
 npm-debug.log*
 yarn-debug.log*
 pnpm-debug.log*
+
+.playwright-cli/
+output/
+private/
+__pycache__/
+*.py[cod]

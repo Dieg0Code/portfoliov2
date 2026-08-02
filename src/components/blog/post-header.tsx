@@ -37,6 +37,8 @@ export function PostHeader({ meta }: PostHeaderProps) {
       )}
       {meta.cover && (
         <div className="blog-post__cover">
+          {/* Cover dimensions are author-controlled frontmatter and may be unknown. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={meta.cover} alt="" loading="eager" />
         </div>
       )}
