@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  memo,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -237,6 +238,89 @@ function LockIcon() {
     </svg>
   );
 }
+
+type LadderRungProps = {
+  entry: Rung;
+  index: number;
+  wins: number;
+  locked: boolean;
+  active: boolean;
+  heuristicBand: string;
+  modelBand: string;
+  strengthLabel: string;
+  onSelect: (entry: Rung, card: HTMLButtonElement, active: boolean) => void;
+};
+
+/*
+  Memoised so the tray sits still while a game runs. These twenty-two cards
+  were reconciled on every move, every telemetry tick and every render the
+  board caused, to produce identical output — only the active card and the
+  one whose win count changed ever differ.
+
+  The click passes its own `active` flag back up rather than having the
+  handler read the selected id from state. That keeps the handler's identity
+  stable across renders, which is what lets this memo hold at all.
+*/
+const LadderRung = memo(function LadderRung({
+  entry,
+  index,
+  wins,
+  locked,
+  active,
+  heuristicBand,
+  modelBand,
+  strengthLabel,
+  onSelect
+}: LadderRungProps) {
+  const cleared = wins >= entry.winsRequired;
+  const isBandStart = index === 0 || index === 6;
+  const style = {
+    "--arena-rung-progress": Math.min(1, wins / entry.winsRequired),
+    "--arena-rung-order": index
+  } as CSSProperties;
+
+  return (
+    <li
+      style={style}
+      className={isBandStart ? "arena-ladder__group-start" : undefined}
+      data-group-label={
+        index === 0 ? heuristicBand : index === 6 ? modelBand : undefined
+      }
+      data-group={index === 0 ? "heuristic" : index === 6 ? "model" : undefined}
+    >
+      <button
+        type="button"
+        data-kind={entry.kind}
+        data-state={cleared ? "cleared" : locked ? "locked" : "open"}
+        aria-current={active ? "true" : undefined}
+        onClick={(event) => onSelect(entry, event.currentTarget, active)}
+      >
+        <span className="arena-ladder__index">{entry.index}</span>
+        <ArenaRivalSigil
+          id={entry.id}
+          kind={entry.kind}
+          strength={entry.composite}
+        />
+        <strong className="arena-ladder__label">{entry.label}</strong>
+        <small className="arena-ladder__generation">
+          {entry.generation}
+          {typeof entry.composite === "number" ? (
+            <i>
+              {strengthLabel} {entry.composite.toFixed(3)}
+            </i>
+          ) : null}
+        </small>
+        <span className="arena-ladder__mark" aria-hidden="true">
+          {locked ? (
+            <LockIcon />
+          ) : (
+            `${Math.min(wins, entry.winsRequired)}/${entry.winsRequired}`
+          )}
+        </span>
+      </button>
+    </li>
+  );
+});
 
 function ArenaLoadingMark({ label }: { label: string }) {
   return (
@@ -628,13 +712,7 @@ export function AtaxxArena({ locale }: { locale: Locale }) {
     setHistory((current) => [...current, { from: selectedCell, to: index }]);
   };
 
-  const selectRung = (next: Rung) => {
-    if (next.id === selectedRungId) return;
-    setSelectedRungId(next.id);
-    resetGame();
-  };
-
-  const seatRungInTray = (card: HTMLButtonElement) => {
+  const seatRungInTray = useCallback((card: HTMLButtonElement) => {
     const tray = ladderListRef.current;
     if (!tray || tray.scrollWidth <= tray.clientWidth) return;
 
@@ -645,7 +723,21 @@ export function AtaxxArena({ locale }: { locale: Locale }) {
         ? "auto"
         : "smooth"
     });
-  };
+  }, []);
+
+  /* Stable across renders — see LadderRung. The card reports whether it was
+     already the active one, so this never has to read selectedRungId and
+     never has to be rebuilt. */
+  const handleSelectRung = useCallback(
+    (next: Rung, card: HTMLButtonElement, alreadyActive: boolean) => {
+      if (!alreadyActive) {
+        setSelectedRungId(next.id);
+        resetGame();
+      }
+      seatRungInTray(card);
+    },
+    [resetGame, seatRungInTray]
+  );
 
   /*
     The rail position used to live in React state, so every scroll event
@@ -876,77 +968,20 @@ export function AtaxxArena({ locale }: { locale: Locale }) {
           className="arena-ladder__list"
           onScroll={handleLadderScroll}
         >
-          {LADDER.map((entry, index) => {
-            const entryWins = wins[entry.id] ?? 0;
-            const isCleared = entryWins >= entry.winsRequired;
-            const isLocked = index >= unlocked;
-            const isActive = entry.id === rung.id;
-            const style = {
-              "--arena-rung-progress": Math.min(
-                1,
-                entryWins / entry.winsRequired
-              ),
-              "--arena-rung-order": index
-            } as CSSProperties;
-
-            return (
-              <li
-                key={entry.id}
-                style={style}
-                className={
-                  index === 0 || index === 6
-                    ? "arena-ladder__group-start"
-                    : undefined
-                }
-                data-group-label={
-                  index === 0
-                    ? t.heuristicBand
-                    : index === 6
-                      ? t.modelBand
-                      : undefined
-                }
-                data-group={
-                  index === 0 ? "heuristic" : index === 6 ? "model" : undefined
-                }
-              >
-                <button
-                  type="button"
-                  data-kind={entry.kind}
-                  data-state={
-                    isCleared ? "cleared" : isLocked ? "locked" : "open"
-                  }
-                  aria-current={isActive ? "true" : undefined}
-                  onClick={(event) => {
-                    selectRung(entry);
-                    seatRungInTray(event.currentTarget);
-                  }}
-                >
-                  <span className="arena-ladder__index">{entry.index}</span>
-                  <ArenaRivalSigil
-                    id={entry.id}
-                    kind={entry.kind}
-                    strength={entry.composite}
-                  />
-                  <strong className="arena-ladder__label">{entry.label}</strong>
-                  <small className="arena-ladder__generation">
-                    {entry.generation}
-                    {typeof entry.composite === "number" ? (
-                      <i>
-                        {t.strengthLabel} {entry.composite.toFixed(3)}
-                      </i>
-                    ) : null}
-                  </small>
-                  <span className="arena-ladder__mark" aria-hidden="true">
-                    {isLocked ? (
-                      <LockIcon />
-                    ) : (
-                      `${Math.min(entryWins, entry.winsRequired)}/${entry.winsRequired}`
-                    )}
-                  </span>
-                </button>
-              </li>
-            );
-          })}
+          {LADDER.map((entry, index) => (
+            <LadderRung
+              key={entry.id}
+              entry={entry}
+              index={index}
+              wins={wins[entry.id] ?? 0}
+              locked={index >= unlocked}
+              active={entry.id === rung.id}
+              heuristicBand={t.heuristicBand}
+              modelBand={t.modelBand}
+              strengthLabel={t.strengthLabel}
+              onSelect={handleSelectRung}
+            />
+          ))}
         </ol>
 
         <span

@@ -8,13 +8,29 @@ import {
   type KeyboardEvent,
   type PointerEvent
 } from "react";
-import { AtaxxArena } from "@/components/home/ataxx-arena";
+import dynamic from "next/dynamic";
+
 import { AtaxxPlayCard } from "@/components/home/ataxx-play-card";
 import { AtaxxStrategyDiagram } from "@/components/home/ataxx-strategy-diagram";
 import { AulaSubtitlesDiagram } from "@/components/home/aula-subtitles-diagram";
 import { GeoGreenTelemetryDiagram } from "@/components/home/geogreen-telemetry-diagram";
 import { NemMemoryDiagram } from "@/components/home/nem-memory-diagram";
 import { PersonalArchive } from "@/components/home/personal-archive";
+
+/* ssr:false because the arena is client-only anyway: it reads the session
+   cookie, measures the tray and talks to /api/engine. Rendering it on the
+   server bought nothing and put it back in the initial payload. */
+const AtaxxArena = dynamic(
+  () =>
+    import("@/components/home/ataxx-arena").then((module) => module.AtaxxArena),
+  {
+    ssr: false,
+    /* Landing straight on /#arena mounts this before the chunk has arrived.
+       Same surface the arena's own loading state uses, so the panel is never
+       an empty hole. */
+    loading: () => <div className="arena arena--loading" aria-busy="true" />
+  }
+);
 
 const MAX_SHIFT_PERCENT = 42;
 const SNAP_THRESHOLD = 0.46;
@@ -334,6 +350,26 @@ export function MechanicalDrawerPrototype() {
   const [activeSection, setActiveSection] = useState<SectionId>("projects");
   const [activeProject, setActiveProject] = useState<ProjectId>("geogreen");
   const [isAtaxxCardFlipped, setIsAtaxxCardFlipped] = useState(false);
+
+  /*
+    The arena is the heaviest thing on this page — the component, the board
+    mirror, the ported heuristics and the whole ladder with its lore — and it
+    is the third tab. It used to be imported statically and mounted from the
+    first paint, so every visitor downloaded and ran it, mounted twenty-two
+    rung cards with their SVG sigils and forty-nine board cells, and fired its
+    session request, whether or not they ever went near it.
+
+    Now the chunk is fetched the first time the arena is opened, and the
+    section stays mounted from then on so a game in progress survives tabbing
+    away and back.
+  */
+  const [arenaRequested, setArenaRequested] = useState(false);
+  if (activeSection === "arena" && !arenaRequested) {
+    /* React's own pattern for state derived from a change, latched so the
+       arena stays mounted once opened. Cheaper than an effect: it resolves in
+       the same render pass instead of costing a second one. */
+    setArenaRequested(true);
+  }
 
   const isOpen = progress >= SNAP_THRESHOLD;
   const t = COPY[locale];
@@ -953,7 +989,7 @@ export function MechanicalDrawerPrototype() {
               aria-hidden={activeSection !== "arena"}
               inert={activeSection !== "arena"}
             >
-              <AtaxxArena locale={locale} />
+              {arenaRequested ? <AtaxxArena locale={locale} /> : null}
             </section>
             </div>
 

@@ -4,10 +4,25 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { requestOpponentMove, warmOpponent } from "@/lib/ataxx/arena-client";
 import { boardFromHistory, type HistoryEntry } from "@/lib/ataxx/board";
-import { LADDER_BY_ID } from "@/lib/ataxx/ladder";
+import type { Rung } from "@/lib/ataxx/ladder";
 
-/** The home card always plays the newest champion; the ladder lives in the arena. */
-const CHAMPION = LADDER_BY_ID.get("nemesis-192")!;
+/**
+ * The home card always plays the newest champion; the ladder lives in the arena.
+ *
+ * Fetched rather than imported. The ladder module carries all twenty-two rungs
+ * with their bilingual lore, and this card needs one of them — only once
+ * somebody flips it over. Importing it at module scope put that whole payload
+ * into the first load of the index, for a game most visitors never start.
+ * Resolved once and reused; both call sites already run inside async work.
+ */
+let championPromise: Promise<Rung> | null = null;
+
+function champion(): Promise<Rung> {
+  championPromise ??= import("@/lib/ataxx/ladder").then(
+    (module) => module.LADDER_BY_ID.get("nemesis-192")!
+  );
+  return championPromise;
+}
 
 type AtaxxHistoryEntry = HistoryEntry;
 
@@ -397,7 +412,7 @@ export function AtaxxPlayCard({
   useEffect(() => {
     if (!flipped) return;
     const controller = new AbortController();
-    void warmOpponent(CHAMPION, controller.signal);
+    void champion().then((rung) => warmOpponent(rung, controller.signal));
     return () => controller.abort();
   }, [flipped]);
 
@@ -417,7 +432,7 @@ export function AtaxxPlayCard({
 
       try {
         const response = await requestOpponentMove(
-          CHAMPION,
+          await champion(),
           boardFromHistory(history),
           history,
           HUMAN,
