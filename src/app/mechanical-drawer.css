@@ -303,42 +303,44 @@ body:has(.drawer-lab) {
   transition:
     transform 580ms cubic-bezier(0.2, 0.78, 0.16, 1),
     opacity 260ms ease;
-  will-change: transform;
 }
 
 .section-panel--projects {
-  transform: translate3d(0, 0, 0);
+  transform: none;
 }
 
 .section-panel--profile {
   border-left: 7px solid var(--plate-machine);
   box-shadow: -18px 0 30px rgba(15, 15, 16, 0.22);
-  transform: translate3d(104%, 0, 0);
+  transform: translateX(104%);
 }
 
 .section-panel--arena {
   border-left: 7px solid var(--plate-oxide);
   box-shadow: -18px 0 30px rgba(15, 15, 16, 0.22);
-  transform: translate3d(104%, 0, 0);
+  transform: translateX(104%);
 }
 
 .section-stage[data-section="profile"] .section-panel--projects,
 .section-stage[data-section="arena"] .section-panel--projects {
   opacity: 0.62;
-  transform: translate3d(-104%, 0, 0);
+  transform: translateX(-104%);
 }
 
 .section-stage[data-section="profile"] .section-panel--profile {
-  transform: translate3d(0, 0, 0);
+  transform: none;
 }
 
 .section-stage[data-section="arena"] .section-panel--profile {
   opacity: 0.62;
-  transform: translate3d(-104%, 0, 0);
+  transform: translateX(-104%);
 }
 
 .section-stage[data-section="arena"] .section-panel--arena {
-  transform: translate3d(0, 0, 0);
+  /* Once dealt into place, the active panel must return to normal document
+     painting. Keeping the whole scrollable Arena in a permanent GPU layer can
+     expose corrupted raster tiles in Chrome Android. */
+  transform: none;
 }
 
 .prototype-masthead {
