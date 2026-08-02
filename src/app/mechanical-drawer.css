@@ -6948,8 +6948,9 @@ body:has(.drawer-lab) {
     inset -2px 0 0 var(--plate-machine);
   color: var(--plate-paper);
   transform-origin: 0 50%;
-  animation: arena-rung-turn-over 560ms cubic-bezier(0.2, 0.78, 0.16, 1)
-    both;
+  /* The selected card stays selected, so a forwards fill kept its layer for
+     as long as you played that rung. It ends where it starts sitting. */
+  animation: arena-rung-turn-over 560ms cubic-bezier(0.2, 0.78, 0.16, 1);
 }
 
 .arena-ladder__list button[aria-current="true"] .arena-ladder__generation,
@@ -6984,7 +6985,8 @@ body:has(.drawer-lab) {
    header; selecting one turns it over and seats it slightly out of the stack. */
 .section-stage[data-section="arena"] .arena-ladder__list li {
   transform-origin: 14px 0;
-  animation: arena-rung-fan 480ms cubic-bezier(0.18, 0.84, 0.19, 1) both;
+  /* Staggered, so it needs the pre-delay hold — but only that one. */
+  animation: arena-rung-fan 480ms cubic-bezier(0.18, 0.84, 0.19, 1) backwards;
   animation-delay: calc(70ms + var(--arena-rung-order, 0) * 16ms);
 }
 
@@ -7301,7 +7303,7 @@ body:has(.drawer-lab) {
 }
 
 .arena-board > button.is-converted .arena-piece {
-  animation: ataxx-piece-infection 430ms cubic-bezier(0.2, 0.78, 0.16, 1) both;
+  animation: ataxx-piece-infection 430ms cubic-bezier(0.2, 0.78, 0.16, 1);
 }
 
 .arena-stage__controls {
@@ -7497,10 +7499,21 @@ body:has(.drawer-lab) {
   background: var(--plate-paper-deep);
 }
 
+/*
+  `backwards`, not `both`.
+
+  A forwards-filling animation never stops being active as far as the
+  compositor is concerned, so Blink keeps the element on its own layer for the
+  rest of the session. Measured on the device, this one alone was holding a
+  1059x1048 texture — 4.2 MB — long after it had finished playing, and its
+  final keyframe is the element's natural state, so the fill was buying
+  nothing. `backwards` still holds the opening pose through the 120ms delay,
+  then lets go.
+*/
 .section-stage[data-section="arena"] .arena-dossier {
   transform-origin: 100% 12%;
   animation: arena-dossier-seat 560ms 120ms
-    cubic-bezier(0.18, 0.84, 0.19, 1) both;
+    cubic-bezier(0.18, 0.84, 0.19, 1) backwards;
 }
 
 .arena-dossier__identity {
@@ -7557,8 +7570,9 @@ body:has(.drawer-lab) {
   overflow-y: auto;
   padding: 12px;
   transform-origin: 100% 12%;
-  animation: arena-dossier-deal 560ms cubic-bezier(0.18, 0.84, 0.19, 1)
-    both;
+  /* No delay and it ends where the element already sits, so there was nothing
+     to fill — only a 3.6 MB layer to keep alive. */
+  animation: arena-dossier-deal 560ms cubic-bezier(0.18, 0.84, 0.19, 1);
 }
 
 /* The dossier remains wheel/touch scrollable on compact desktop heights, but
@@ -7841,7 +7855,8 @@ body:has(.drawer-lab) {
 }
 
 .arena-file[open] .arena-file__content {
-  animation: arena-file-open 520ms cubic-bezier(0.18, 0.84, 0.19, 1) both;
+  /* An opened file stays open — same trap, same fix. */
+  animation: arena-file-open 520ms cubic-bezier(0.18, 0.84, 0.19, 1);
 }
 
 .arena-file__content header {
@@ -8083,11 +8098,11 @@ body:has(.drawer-lab) {
    status line already says PENSANDO; that is enough. */
 
 .arena-board > button.is-arrival--jump .arena-piece {
-  animation: arena-piece-jump 400ms cubic-bezier(0.16, 0.74, 0.2, 1) both;
+  animation: arena-piece-jump 400ms cubic-bezier(0.16, 0.74, 0.2, 1);
 }
 
 .arena-board > button.is-arrival--clone .arena-piece {
-  animation: arena-piece-clone 320ms cubic-bezier(0.16, 0.74, 0.2, 1) both;
+  animation: arena-piece-clone 320ms cubic-bezier(0.16, 0.74, 0.2, 1);
 }
 
 @keyframes arena-piece-jump {
@@ -8123,7 +8138,9 @@ body:has(.drawer-lab) {
   content: "";
   opacity: 0;
   pointer-events: none;
-  animation: arena-infection-ring 460ms cubic-bezier(0.2, 0.78, 0.16, 1) both;
+  /* The ring's last frame is opacity 0, which is also the opacity declared
+     above — so filling forwards held an invisible element on a live layer. */
+  animation: arena-infection-ring 460ms cubic-bezier(0.2, 0.78, 0.16, 1);
 }
 
 .arena-board > button.has-human.is-converted::before {
