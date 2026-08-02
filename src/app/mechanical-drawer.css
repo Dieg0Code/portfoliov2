@@ -6904,8 +6904,18 @@ body:has(.drawer-lab) {
   stroke: none;
 }
 
+/*
+  Machine, not oxide.
+
+  Oxide is the player throughout the arena — your pieces, your score, and the
+  fill under a rung that tracks your wins against it. This meter is not yours:
+  it is the model's composite strength. Painting it in the player's colour put
+  two unrelated orange bars inside one card, which read as one measurement
+  drawn twice. The track underneath was already machine-tinted; the value
+  belongs in the same family.
+*/
 .arena-ladder__sigil-meter-value {
-  fill: var(--plate-oxide);
+  fill: var(--plate-machine);
   stroke: none;
 }
 
