@@ -420,6 +420,7 @@ export function AtaxxPlayCard({
           CHAMPION,
           boardFromHistory(history),
           history,
+          HUMAN,
           controller.signal
         );
         if (response.source !== "model") {

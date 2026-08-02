@@ -6552,12 +6552,7 @@ body:has(.drawer-lab) {
 }
 
 .arena-gate__honeypot {
-  position: absolute !important;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
+  display: none;
 }
 
 .arena-gate__error {

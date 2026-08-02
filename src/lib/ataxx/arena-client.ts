@@ -3,7 +3,13 @@
  * Python inference function. Callers do not need to know which is which.
  */
 
-import { AtaxxBoard, historyToWire, type HistoryEntry, type Move } from "@/lib/ataxx/board";
+import {
+  AtaxxBoard,
+  historyToWire,
+  type HistoryEntry,
+  type Move,
+  type Player
+} from "@/lib/ataxx/board";
 import { heuristicMove, type HeuristicLevel } from "@/lib/ataxx/heuristics";
 import type { Rung } from "@/lib/ataxx/ladder";
 
@@ -96,6 +102,7 @@ function isBoardIndex(value: unknown): value is number {
 async function requestModelMove(
   opponent: string,
   history: readonly HistoryEntry[],
+  startingPlayer: Player,
   externalSignal?: AbortSignal
 ): Promise<EngineMove> {
   const controller = new AbortController();
@@ -108,7 +115,11 @@ async function requestModelMove(
       method: "POST",
       cache: "no-store",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ opponent, history: historyToWire(history) }),
+      body: JSON.stringify({
+        opponent,
+        history: historyToWire(history),
+        startingPlayer
+      }),
       signal: controller.signal
     });
 
@@ -199,6 +210,7 @@ export async function requestOpponentMove(
   rung: Rung,
   board: AtaxxBoard,
   history: readonly HistoryEntry[],
+  startingPlayer: Player,
   signal?: AbortSignal
 ): Promise<EngineMove> {
   if (rung.kind === "heuristic") {
@@ -218,7 +230,12 @@ export async function requestOpponentMove(
   for (let attempt = 0; attempt <= ENGINE_RETRIES; attempt += 1) {
     if (attempt > 0) await delay(ENGINE_RETRY_DELAY_MS, signal);
     try {
-      const result = await requestModelMove(rung.engine, history, signal);
+      const result = await requestModelMove(
+        rung.engine,
+        history,
+        startingPlayer,
+        signal
+      );
       if (!isLegal(board, result.move)) {
         throw new Error("Arena engine proposed an illegal move.");
       }

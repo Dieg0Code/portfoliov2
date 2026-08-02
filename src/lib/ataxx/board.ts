@@ -105,13 +105,13 @@ export class AtaxxBoard {
   lastMoveDestination: number | null;
   previousMoveDestination: number | null;
 
-  constructor() {
+  constructor(startingPlayer: Player = PLAYER_1) {
     this.grid = new Int8Array(CELL_COUNT);
     this.grid[0] = PLAYER_1;
     this.grid[CELL_COUNT - 1] = PLAYER_1;
     this.grid[BOARD_SIZE - 1] = PLAYER_2;
     this.grid[BOARD_SIZE * (BOARD_SIZE - 1)] = PLAYER_2;
-    this.currentPlayer = PLAYER_1;
+    this.currentPlayer = startingPlayer;
     this.halfMoves = 0;
     this.positionCounts = new Map();
     this.positionCounts.set(this.positionKey(), 1);
@@ -299,8 +299,11 @@ export class AtaxxBoard {
   }
 }
 
-export function boardFromHistory(history: readonly HistoryEntry[]): AtaxxBoard {
-  const board = new AtaxxBoard();
+export function boardFromHistory(
+  history: readonly HistoryEntry[],
+  startingPlayer: Player = PLAYER_1
+): AtaxxBoard {
+  const board = new AtaxxBoard(startingPlayer);
   for (const entry of history) {
     if (entry === null) {
       board.step(null);

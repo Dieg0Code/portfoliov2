@@ -25,6 +25,7 @@ export type ArenaMatchInput = {
   moves: (number[] | null)[];
   engineFailures: number;
   durationMs: number | null;
+  startingPlayer: 1 | -1;
 };
 
 export type StandingRow = {
@@ -148,7 +149,8 @@ export async function recordArenaMatch(input: ArenaMatchInput): Promise<void> {
       half_moves: input.halfMoves,
       moves: input.moves,
       engine_failures: input.engineFailures,
-      duration_ms: input.durationMs
+      duration_ms: input.durationMs,
+      starting_player: input.startingPlayer
     }),
     cache: "no-store"
   });

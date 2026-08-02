@@ -54,13 +54,15 @@ def move_distance(move: Move) -> int:
 class AtaxxBoard:
     """Small, dependency-light mirror of the v15 Ataxx state."""
 
-    def __init__(self) -> None:
+    def __init__(self, starting_player: int = PLAYER_1) -> None:
+        if starting_player not in (PLAYER_1, PLAYER_2):
+            raise ValueError("Starting player must be PLAYER_1 or PLAYER_2.")
         self.grid = np.zeros((BOARD_SIZE, BOARD_SIZE), dtype=np.int8)
         self.grid[0, 0] = PLAYER_1
         self.grid[BOARD_SIZE - 1, BOARD_SIZE - 1] = PLAYER_1
         self.grid[0, BOARD_SIZE - 1] = PLAYER_2
         self.grid[BOARD_SIZE - 1, 0] = PLAYER_2
-        self.current_player = PLAYER_1
+        self.current_player = starting_player
         self.half_moves = 0
         self._position_counts: Counter[tuple[int, bytes]] = Counter()
         self._position_counts[self._position_key()] = 1
@@ -301,7 +303,10 @@ def move_to_indices(move: Move | None) -> tuple[int, int] | None:
     )
 
 
-def history_to_board(history: object) -> AtaxxBoard:
+def history_to_board(
+    history: object,
+    starting_player: int = PLAYER_1,
+) -> AtaxxBoard:
     if not isinstance(history, list):
         raise TypeError("History must be a list.")
     if len(history) > MAX_HALF_MOVES:
@@ -309,7 +314,7 @@ def history_to_board(history: object) -> AtaxxBoard:
             f"History cannot contain more than {MAX_HALF_MOVES} half-moves."
         )
 
-    board = AtaxxBoard()
+    board = AtaxxBoard(starting_player)
     for index, entry in enumerate(history):
         if board.is_game_over():
             raise ValueError(f"History continues after game over at item {index}.")
