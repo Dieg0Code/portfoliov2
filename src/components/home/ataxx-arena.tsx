@@ -967,7 +967,6 @@ export function AtaxxArena({ locale }: { locale: Locale }) {
             role="grid"
             aria-label={rung.label}
             data-locked={rungLocked || undefined}
-            data-thinking={(thinking && rung.kind === "model") || undefined}
           >
             <span className="arena-board__mark arena-board__mark--nw" aria-hidden="true" />
             <span className="arena-board__mark arena-board__mark--ne" aria-hidden="true" />
@@ -1045,8 +1044,6 @@ export function AtaxxArena({ locale }: { locale: Locale }) {
               </button>
             );
           })}
-
-            <span className="arena-board__scan" aria-hidden="true" />
           </div>
         </div>
 

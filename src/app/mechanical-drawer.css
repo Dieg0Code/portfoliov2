@@ -8019,37 +8019,11 @@ body:has(.drawer-lab) {
   border-right-width: 1px;
 }
 
-/* A sweep across the board while the engine searches: the only honest way to
-   show that something is running that a heuristic does not have. */
-.arena-board__scan {
-  position: absolute;
-  z-index: 4;
-  top: 0;
-  bottom: 0;
-  left: -2px;
-  display: none;
-  width: 1px;
-  pointer-events: none;
-  background: color-mix(in srgb, var(--plate-machine) 68%, transparent);
-  box-shadow:
-    -3px 0 0 color-mix(in srgb, var(--plate-oxide) 18%, transparent),
-    3px 0 0 color-mix(in srgb, var(--plate-machine) 12%, transparent);
-}
-
-.arena-board[data-thinking] .arena-board__scan {
-  display: block;
-  animation: arena-scan 1.45s cubic-bezier(0.34, 0.02, 0.66, 0.98) infinite;
-}
-
-@keyframes arena-scan {
-  from {
-    left: -2px;
-  }
-
-  to {
-    left: calc(100% + 2px);
-  }
-}
+/* The engine's search used to be shown as a line sweeping across the board.
+   It animated `left`, so every frame relayouted and repainted all 49 cells
+   inside an isolated, clipped stacking context — on Chrome Android that
+   outran the rasteriser and left flat grey tiles behind on the board. The
+   status line already says PENSANDO; that is enough. */
 
 .arena-board > button.is-arrival--jump .arena-piece {
   animation: arena-piece-jump 400ms cubic-bezier(0.16, 0.74, 0.2, 1) both;
@@ -8334,6 +8308,15 @@ body:has(.drawer-lab) {
   .arena-ladder__list button[aria-current="true"]
     .arena-ladder__sigil-network-node:not(.arena-ladder__sigil-network-node--active):not(.arena-ladder__sigil-network-node--output) {
     fill: var(--plate-paper-deep);
+  }
+
+  /* The sigil's travelling dash is the last endless paint invalidation left in
+     the arena, and on touch layouts its card sits directly above the board.
+     Freezing it here keeps the whole section repaint-free once a move settles. */
+  .arena-ladder__list button[aria-current="true"] .arena-ladder__sigil-flow,
+  .arena-ladder__list button[aria-current="true"]
+    .arena-ladder__sigil-route--active {
+    animation: none;
   }
 
   .arena-ladder__sigil {
