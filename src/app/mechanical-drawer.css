@@ -6754,6 +6754,7 @@ body:has(.drawer-lab) {
   color: var(--plate-ink);
   font-family: var(--plate-mono);
   text-align: left;
+  -webkit-tap-highlight-color: transparent;
   transition:
     width 220ms cubic-bezier(0.2, 0.78, 0.16, 1),
     margin-left 220ms cubic-bezier(0.2, 0.78, 0.16, 1),
@@ -7079,12 +7080,58 @@ body:has(.drawer-lab) {
   letter-spacing: -0.03em;
 }
 
-.arena-stage__score--rival {
-  text-align: right;
+.arena-stage__opponent {
+  display: grid;
+  min-width: 124px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "type score"
+    "name score";
+  align-items: center;
+  gap: 0 8px;
+  border-left: 2px solid var(--plate-machine);
+  padding: 4px 7px 4px 9px;
+  background: color-mix(in srgb, var(--plate-machine) 8%, transparent);
+  box-shadow: inset -1px 0 0 color-mix(in srgb, var(--plate-oxide) 72%, transparent);
+  font-family: var(--plate-mono);
+  text-align: left;
 }
 
-.arena-stage__score--rival b {
+.arena-stage__opponent small {
+  grid-area: type;
+  overflow: hidden;
   color: var(--plate-machine);
+  font-size: 0.37rem;
+  font-weight: 900;
+  letter-spacing: 0.075em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.arena-stage__opponent strong {
+  grid-area: name;
+  overflow: hidden;
+  color: var(--plate-ink);
+  font-size: 0.62rem;
+  letter-spacing: 0.035em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.arena-stage__opponent b {
+  grid-area: score;
+  color: var(--plate-machine);
+  font-size: 0.94rem;
+  letter-spacing: -0.04em;
+}
+
+.arena-stage__opponent[data-kind="heuristic"] {
+  border-left-color: var(--plate-oxide);
+  background: color-mix(in srgb, var(--plate-oxide) 6%, transparent);
+}
+
+.arena-stage__opponent[data-kind="heuristic"] small {
+  color: var(--plate-oxide);
 }
 
 .arena-stage__status {
@@ -7111,6 +7158,7 @@ body:has(.drawer-lab) {
   align-self: center;
   justify-self: center;
   overflow: hidden;
+  isolation: isolate;
   border: 1px solid var(--plate-ink);
   background: var(--plate-paper);
   grid-template-columns: repeat(7, 1fr);
@@ -7136,6 +7184,8 @@ body:has(.drawer-lab) {
   border-radius: 0;
   padding: 0;
   background: color-mix(in srgb, var(--plate-paper) 74%, var(--plate-paper-deep));
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .arena-board > button:nth-of-type(7n) {
@@ -7244,15 +7294,44 @@ body:has(.drawer-lab) {
 }
 
 .arena-stage__restart {
+  position: relative;
   display: grid;
-  width: 26px;
-  height: 26px;
+  min-width: 92px;
+  min-height: 31px;
   cursor: pointer;
-  place-items: center;
+  grid-template-columns: minmax(0, 1fr) 29px;
+  align-items: stretch;
   border: 1px solid var(--plate-ink);
   border-radius: 0;
-  background: transparent;
+  padding: 0;
+  background: var(--plate-paper);
   color: var(--plate-ink);
+  box-shadow: 3px 3px 0 color-mix(in srgb, var(--plate-machine) 34%, transparent);
+  font-family: var(--plate-mono);
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    color 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms cubic-bezier(0.2, 0.78, 0.16, 1);
+}
+
+.arena-stage__restart-label {
+  display: grid;
+  place-items: center start;
+  padding-inline: 8px;
+  color: var(--plate-oxide);
+  font-size: 0.43rem;
+  font-weight: 900;
+  letter-spacing: 0.075em;
+}
+
+.arena-stage__restart-mark {
+  display: grid;
+  place-items: center;
+  border-left: 1px solid var(--plate-ink);
+  background: color-mix(in srgb, var(--plate-machine) 8%, var(--plate-paper));
+  font-style: normal;
 }
 
 .arena-stage__restart svg {
@@ -7261,11 +7340,35 @@ body:has(.drawer-lab) {
   fill: none;
   stroke: currentColor;
   stroke-width: 1.4;
+  transition: transform 360ms cubic-bezier(0.2, 0.78, 0.16, 1);
 }
 
 .arena-stage__restart:hover {
   background: var(--plate-ink);
   color: var(--plate-paper);
+}
+
+.arena-stage__restart:hover .arena-stage__restart-label {
+  color: var(--plate-paper);
+}
+
+.arena-stage__restart:hover .arena-stage__restart-mark {
+  border-left-color: var(--plate-paper);
+  background: var(--plate-machine);
+}
+
+.arena-stage__restart:hover svg {
+  transform: rotate(-90deg);
+}
+
+.arena-stage__restart:focus-visible {
+  outline: 2px solid var(--plate-oxide);
+  outline-offset: 3px;
+}
+
+.arena-stage__restart:active {
+  box-shadow: 1px 1px 0 color-mix(in srgb, var(--plate-machine) 38%, transparent);
+  transform: translate3d(2px, 2px, 0);
 }
 
 /*
@@ -7932,30 +8035,30 @@ body:has(.drawer-lab) {
 .arena-board__scan {
   position: absolute;
   z-index: 4;
-  inset: 0;
-  opacity: 0;
+  top: 0;
+  bottom: 0;
+  left: -2px;
+  display: none;
+  width: 1px;
   pointer-events: none;
-  background: linear-gradient(
-    100deg,
-    transparent 42%,
-    color-mix(in srgb, var(--plate-machine) 22%, transparent) 50%,
-    transparent 58%
-  );
-  background-size: 240% 100%;
+  background: color-mix(in srgb, var(--plate-machine) 68%, transparent);
+  box-shadow:
+    -3px 0 0 color-mix(in srgb, var(--plate-oxide) 18%, transparent),
+    3px 0 0 color-mix(in srgb, var(--plate-machine) 12%, transparent);
 }
 
 .arena-board[data-thinking] .arena-board__scan {
-  opacity: 1;
-  animation: arena-scan 1.25s linear infinite;
+  display: block;
+  animation: arena-scan 1.45s cubic-bezier(0.34, 0.02, 0.66, 0.98) infinite;
 }
 
 @keyframes arena-scan {
   from {
-    background-position: 130% 0;
+    left: -2px;
   }
 
   to {
-    background-position: -80% 0;
+    left: calc(100% + 2px);
   }
 }
 
@@ -8170,49 +8273,38 @@ body:has(.drawer-lab) {
     display: flex;
     overflow-x: auto;
     overflow-y: hidden;
+    padding-inline: 8px;
+    overscroll-behavior-inline: contain;
+    scroll-padding-inline: 8px;
+    scroll-snap-type: inline proximity;
+    scrollbar-width: none;
+    touch-action: pan-x;
+    -webkit-overflow-scrolling: touch;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .arena-ladder__list::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
   }
 
   .section-stage[data-section="arena"] .arena-ladder__list li {
-    transform-origin: 0 50%;
-    animation-name: arena-rung-spread;
-    animation-delay: calc(55ms + var(--arena-rung-order, 0) * 14ms);
+    /* Chrome Android occasionally repaints 3D carousel layers over the board.
+       The tray itself supplies the physical movement, so cards stay on the
+       same paint plane on touch layouts. */
+    animation: none;
+    transform: none;
   }
 
   .arena-ladder__scroll-rail {
-    top: auto;
-    right: 0;
-    bottom: 0;
-    left: 108px;
-    width: auto;
-    height: 4px;
-  }
-
-  .arena-ladder__scroll-rail::before,
-  .arena-ladder__scroll-rail::after {
-    top: auto;
-    bottom: 0;
-    width: 1px;
-    height: 4px;
-  }
-
-  .arena-ladder__scroll-rail::before {
-    right: auto;
-    left: 0;
-  }
-
-  .arena-ladder__scroll-rail > i {
-    top: 0;
-    right: auto;
-    left: calc(var(--arena-ladder-scroll, 0) * (100% - 42px));
-    width: 42px;
-    height: 4px;
-    border: 0;
-    box-shadow: inset 0 2px 0 var(--plate-oxide);
-    transition: left 80ms linear;
+    display: none;
   }
 
   .arena-ladder__list li {
     flex: 0 0 auto;
+    perspective: none;
+    scroll-snap-align: center;
   }
 
   .arena-ladder__group-start::before {
@@ -8226,6 +8318,33 @@ body:has(.drawer-lab) {
     border-bottom: 0;
     border-right: 1px solid var(--plate-line);
     padding: 6px 7px 6px 4px;
+  }
+
+  .arena-ladder__list button[aria-current="true"] {
+    width: 158px;
+    margin-left: 0;
+    background: color-mix(in srgb, var(--plate-machine) 6%, var(--plate-paper));
+    box-shadow:
+      inset 3px 0 0 var(--plate-oxide),
+      inset -2px 0 0 var(--plate-machine),
+      0 3px 0 color-mix(in srgb, var(--plate-machine) 36%, transparent);
+    color: var(--plate-ink);
+    animation: none;
+    transform: none;
+  }
+
+  .arena-ladder__list button[aria-current="true"] .arena-ladder__generation,
+  .arena-ladder__list button[aria-current="true"] .arena-ladder__mark {
+    color: var(--plate-grey);
+  }
+
+  .arena-ladder__list button[aria-current="true"]
+    .arena-ladder__sigil-decision,
+  .arena-ladder__list button[aria-current="true"]
+    .arena-ladder__sigil-terminal,
+  .arena-ladder__list button[aria-current="true"]
+    .arena-ladder__sigil-network-node:not(.arena-ladder__sigil-network-node--active):not(.arena-ladder__sigil-network-node--output) {
+    fill: var(--plate-paper-deep);
   }
 
   .arena-ladder__sigil {
@@ -8263,6 +8382,33 @@ body:has(.drawer-lab) {
     padding: 10px;
   }
 
+  .arena-stage__hud {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      "you opponent"
+      "status status";
+    gap: 6px 12px;
+  }
+
+  .arena-stage__score {
+    grid-area: you;
+  }
+
+  .arena-stage__status {
+    width: 100%;
+    grid-area: status;
+    border-top: 1px solid color-mix(in srgb, var(--plate-ink) 9%, transparent);
+    padding-top: 6px;
+    text-align: left;
+  }
+
+  .arena-stage__opponent {
+    width: min(164px, 100%);
+    min-width: 0;
+    grid-area: opponent;
+    justify-self: end;
+  }
+
   .arena-dossier {
     min-height: auto;
   }
@@ -8280,8 +8426,9 @@ body:has(.drawer-lab) {
   }
 
   .arena-stage__restart {
-    width: 34px;
-    height: 34px;
+    min-width: 96px;
+    min-height: 38px;
+    grid-template-columns: minmax(0, 1fr) 35px;
   }
 
   /* The gate stacks: two columns at 390px squeeze both into unreadability. */
