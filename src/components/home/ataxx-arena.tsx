@@ -1046,24 +1046,6 @@ export function AtaxxArena({ locale }: { locale: Locale }) {
             );
           })}
 
-          <svg
-            className="arena-board__feedback"
-            viewBox="0 0 7 7"
-            preserveAspectRatio="none"
-            aria-hidden="true"
-          >
-            {lastMove ? (
-              <line
-                key={`move-${history.length}`}
-                className="arena-board__last-move"
-                x1={columnOf(lastMove.from) + 0.5}
-                y1={rowOf(lastMove.from) + 0.5}
-                x2={columnOf(lastMove.to) + 0.5}
-                y2={rowOf(lastMove.to) + 0.5}
-              />
-            ) : null}
-          </svg>
-
             <span className="arena-board__scan" aria-hidden="true" />
           </div>
         </div>
