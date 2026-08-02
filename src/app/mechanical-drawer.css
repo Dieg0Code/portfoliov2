@@ -7200,39 +7200,14 @@ body:has(.drawer-lab) {
   cursor: pointer;
 }
 
-.arena-board > button.is-origin,
-.arena-board > button.is-arrival {
-  background-color: color-mix(in srgb, var(--plate-machine) 15%, var(--plate-paper));
-  background-repeat: no-repeat;
-}
-
-/* Keep last-move feedback local to its two cells. A board-sized SVG used to
-   sit above all 49 buttons; on Chrome Android that extra raster surface could
-   be repainted as a corrupted horizontal band. These registration corners
-   carry the same technical language without adding an overlay layer. */
+/* Keep last-move feedback local to its two cells. The restrained tone shift
+   preserves the reading without introducing another overlay or visual mark. */
 .arena-board > button.is-origin {
   background-color: color-mix(in srgb, var(--plate-ink) 7%, var(--plate-paper));
-  background-image:
-    linear-gradient(var(--plate-machine), var(--plate-machine)),
-    linear-gradient(var(--plate-machine), var(--plate-machine));
-  background-position:
-    left 5px top 5px,
-    left 5px top 5px;
-  background-size:
-    11px 1px,
-    1px 11px;
 }
 
 .arena-board > button.is-arrival {
-  background-image:
-    linear-gradient(var(--plate-oxide), var(--plate-oxide)),
-    linear-gradient(var(--plate-oxide), var(--plate-oxide));
-  background-position:
-    right 5px bottom 5px,
-    right 5px bottom 5px;
-  background-size:
-    11px 1px,
-    1px 11px;
+  background-color: color-mix(in srgb, var(--plate-machine) 15%, var(--plate-paper));
 }
 
 .arena-board > button.is-selected {
