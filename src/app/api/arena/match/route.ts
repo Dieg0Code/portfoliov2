@@ -21,6 +21,7 @@ const MAX_SUBMITTED_MOVES = MAX_HALF_MOVES;
 type RequestBody = {
   opponentId?: unknown;
   moves?: unknown;
+  startingPlayer?: unknown;
   engineFailures?: unknown;
   durationMs?: unknown;
 };
@@ -43,12 +44,15 @@ function readSession(request: Request) {
  * stored row is a real, finished, legal game, which is what makes the match log
  * usable as a training corpus later.
  */
-function replay(rawMoves: unknown) {
+function replay(
+  rawMoves: unknown,
+  startingPlayer: typeof PLAYER_1 | typeof PLAYER_2
+) {
   if (!Array.isArray(rawMoves) || rawMoves.length > MAX_SUBMITTED_MOVES) {
     throw new Error("invalid_moves");
   }
 
-  const board = new AtaxxBoard();
+  const board = new AtaxxBoard(startingPlayer);
   const moves: (number[] | null)[] = [];
 
   for (const entry of rawMoves) {
@@ -91,7 +95,7 @@ function replay(rawMoves: unknown) {
 
   if (!board.isGameOver()) throw new Error("game_not_finished");
 
-  // The human always opens as player one.
+  // The human always owns player one, but either side may take the first turn.
   const playerPieces = board.countPieces(PLAYER_1);
   const opponentPieces = board.countPieces(PLAYER_2);
   const result = board.resultForPlayerOne();
@@ -132,9 +136,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "unknown_opponent" }, { status: 422 });
   }
 
+  const startingPlayer =
+    body.startingPlayer === PLAYER_2 ? PLAYER_2 : PLAYER_1;
+
   let replayed: ReturnType<typeof replay>;
   try {
-    replayed = replay(body.moves);
+    replayed = replay(body.moves, startingPlayer);
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "invalid_moves" },
@@ -161,6 +168,7 @@ export async function POST(request: Request) {
       opponentPieces: replayed.opponentPieces,
       halfMoves: replayed.halfMoves,
       moves: replayed.moves,
+      startingPlayer,
       engineFailures,
       durationMs
     });

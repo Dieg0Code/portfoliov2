@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 
 from nemesis_runtime import NemesisEngine, history_to_board
-from nemesis_runtime.board import PLAYER_2
+from nemesis_runtime.board import PLAYER_1, PLAYER_2
 
 MODEL_PATH = (
     Path(__file__).resolve().parents[1] / "api" / "models" / "nemesis-192.onnx"
@@ -28,6 +28,14 @@ class BoardHistoryTests(unittest.TestCase):
     def test_history_rejects_illegal_moves(self) -> None:
         with self.assertRaisesRegex(ValueError, "not a legal move"):
             history_to_board([[0, 48]])
+
+    def test_player_two_can_open_without_an_illegal_pass(self) -> None:
+        board = history_to_board([], starting_player=PLAYER_2)
+
+        self.assertEqual(board.current_player, PLAYER_2)
+        self.assertEqual(board.half_moves, 0)
+        self.assertTrue(board.has_valid_moves(PLAYER_2))
+        self.assertTrue(board.has_valid_moves(PLAYER_1))
 
     def test_ply_cap_ends_the_game_as_a_draw(self) -> None:
         """Without this cap a shuffling game never terminates."""

@@ -13,7 +13,7 @@ from nemesis_runtime import (
     history_to_board,
     move_to_indices,
 )
-from nemesis_runtime.board import PLAYER_2
+from nemesis_runtime.board import PLAYER_1, PLAYER_2
 
 MODELS_DIR = Path(__file__).resolve().parent / "models"
 MANIFEST_PATH = MODELS_DIR / "manifest.json"
@@ -187,7 +187,16 @@ class handler(BaseHTTPRequestHandler):
             return
 
         try:
-            board = history_to_board(payload.get("history"))
+            starting_player = payload.get("startingPlayer", PLAYER_1)
+            if isinstance(starting_player, bool) or starting_player not in (
+                PLAYER_1,
+                PLAYER_2,
+            ):
+                raise ValueError("startingPlayer must be 1 or -1.")
+            board = history_to_board(
+                payload.get("history"),
+                starting_player=starting_player,
+            )
             if board.is_game_over():
                 raise ValueError("The submitted game is already over.")
             if board.current_player != PLAYER_2:

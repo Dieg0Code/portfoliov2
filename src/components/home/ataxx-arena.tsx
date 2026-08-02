@@ -23,7 +23,8 @@ import {
   moveToIndices,
   rowOf,
   type HistoryEntry,
-  type Move
+  type Move,
+  type Player
 } from "@/lib/ataxx/board";
 import { requestOpponentMove, warmOpponent } from "@/lib/ataxx/arena-client";
 import {
@@ -93,6 +94,8 @@ const COPY = {
     thinking: "PENSANDO",
     selectPiece: "ELIGE FICHA",
     selectTarget: "ELIGE DESTINO",
+    youOpen: "ABRES TÚ · ELIGE FICHA",
+    rivalOpens: "ABRE {label}",
     youPass: "SIN MOVIMIENTOS · PASAS",
     rivalPass: "EL RIVAL PASA",
     win: "VICTORIA",
@@ -172,6 +175,8 @@ const COPY = {
     thinking: "THINKING",
     selectPiece: "CHOOSE PIECE",
     selectTarget: "CHOOSE TARGET",
+    youOpen: "YOU OPEN · CHOOSE PIECE",
+    rivalOpens: "{label} OPENS",
     youPass: "NO MOVES · YOU PASS",
     rivalPass: "THE RIVAL PASSES",
     win: "VICTORY",
@@ -260,6 +265,10 @@ function ArenaLoadingMark({ label }: { label: string }) {
   );
 }
 
+function drawStartingPlayer(): Player {
+  return Math.random() < 0.5 ? PLAYER_1 : PLAYER_2;
+}
+
 export function AtaxxArena({ locale }: { locale: Locale }) {
   const t = COPY[locale];
 
@@ -271,6 +280,7 @@ export function AtaxxArena({ locale }: { locale: Locale }) {
 
   const [selectedRungId, setSelectedRungId] = useState(LADDER[0].id);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [startingPlayer, setStartingPlayer] = useState<Player>(PLAYER_1);
   const [selectedCell, setSelectedCell] = useState<number | null>(null);
   const [converted, setConverted] = useState<number[]>([]);
   const [thinking, setThinking] = useState(false);
@@ -319,7 +329,10 @@ export function AtaxxArena({ locale }: { locale: Locale }) {
   const rungIndex = LADDER.indexOf(rung);
   const rungLocked = rungIndex >= unlocked;
 
-  const board = useMemo(() => boardFromHistory(history), [history]);
+  const board = useMemo(
+    () => boardFromHistory(history, startingPlayer),
+    [history, startingPlayer]
+  );
   const gameOver = useMemo(() => board.isGameOver(), [board]);
   const outcome: Outcome = useMemo(() => {
     if (!gameOver) return null;
@@ -354,6 +367,7 @@ export function AtaxxArena({ locale }: { locale: Locale }) {
 
   const resetGame = useCallback(() => {
     setHistory([]);
+    setStartingPlayer(drawStartingPlayer());
     setSelectedCell(null);
     setConverted([]);
     setEngineFailures(0);
@@ -392,8 +406,10 @@ export function AtaxxArena({ locale }: { locale: Locale }) {
       .then((response) => (response.ok ? response.json() : null))
       .then((payload) => {
         if (!live || !payload) return;
-        setSession(payload.player ?? null);
+        const player = payload.player ?? null;
+        setSession(player);
         setWins(payload.wins ?? {});
+        if (player) setStartingPlayer(drawStartingPlayer());
       })
       .catch(() => undefined)
       .finally(() => {
@@ -420,7 +436,7 @@ export function AtaxxArena({ locale }: { locale: Locale }) {
           name: form.get("name"),
           email: form.get("email"),
           consent: form.get("consent") === "on",
-          company: form.get("company"),
+          arenaCheck: form.get("arena-check"),
           locale
         })
       });
@@ -432,6 +448,7 @@ export function AtaxxArena({ locale }: { locale: Locale }) {
       }
       setSession(payload.player ?? null);
       setWins(payload.wins ?? {});
+      setStartingPlayer(drawStartingPlayer());
     } catch {
       setSignInError(t.errors.unknown);
     } finally {
@@ -473,6 +490,7 @@ export function AtaxxArena({ locale }: { locale: Locale }) {
           rung,
           board,
           historySnapshot,
+          startingPlayer,
           controller.signal
         );
         if (!live || controller.signal.aborted) return;
@@ -519,7 +537,7 @@ export function AtaxxArena({ locale }: { locale: Locale }) {
     };
     // `board` is derived from `history`, so history alone gates the effect.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [history, session, rungLocked, gameOver, rung.id]);
+  }, [history, session, rungLocked, gameOver, rung.id, startingPlayer]);
 
   // Warm the model as soon as a rung is selected, so the first reply is not cold.
   useEffect(() => {
@@ -544,6 +562,7 @@ export function AtaxxArena({ locale }: { locale: Locale }) {
       body: JSON.stringify({
         opponentId: rung.id,
         moves: historyToWire(history),
+        startingPlayer,
         engineFailures,
         durationMs: Date.now() - startedAtRef.current
       })
@@ -559,7 +578,7 @@ export function AtaxxArena({ locale }: { locale: Locale }) {
       })
       .catch(() => undefined)
       .finally(() => setSavingMatch(false));
-  }, [engineFailures, gameOver, history, rung.id, session, wins]);
+  }, [engineFailures, gameOver, history, rung.id, session, startingPlayer, wins]);
 
   // ---- standings ---------------------------------------------------------
 
@@ -612,6 +631,10 @@ export function AtaxxArena({ locale }: { locale: Locale }) {
       : outcome === "loss"
         ? t.loss
         : t.draw
+    : history.length === 0
+      ? startingPlayer === PLAYER_1
+        ? t.youOpen
+        : t.rivalOpens.replace("{label}", rung.label)
     : thinking
       ? t.thinking
       : board.currentPlayer === PLAYER_2
@@ -740,11 +763,15 @@ export function AtaxxArena({ locale }: { locale: Locale }) {
 
               <input
                 className="arena-gate__honeypot"
-                name="company"
+                name="arena-check"
                 type="text"
                 tabIndex={-1}
                 autoComplete="off"
                 aria-hidden="true"
+                readOnly
+                data-1p-ignore
+                data-bwignore
+                data-lpignore="true"
               />
 
               {signInError ? (

@@ -16,7 +16,7 @@ type RequestBody = {
   email?: unknown;
   locale?: unknown;
   consent?: unknown;
-  company?: unknown;
+  arenaCheck?: unknown;
 };
 
 function normalizeName(value: unknown) {
@@ -84,7 +84,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "invalid_body" }, { status: 400 });
   }
 
-  if (typeof body.company === "string" && body.company.trim()) {
+  if (typeof body.arenaCheck === "string" && body.arenaCheck.trim()) {
     return NextResponse.json({ error: "invalid_request" }, { status: 400 });
   }
 
