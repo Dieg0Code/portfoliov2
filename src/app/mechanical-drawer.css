@@ -8289,6 +8289,18 @@ body:has(.drawer-lab) {
     height: 0;
   }
 
+  /* Keep the mobile tray on one paint plane. Animated descendants — including
+     SVG stroke reads and progress fills — can make Chrome Android promote a
+     whole card and later composite that texture over the board. The tray's
+     native smooth scroll remains the only motion here. */
+  .arena-ladder__list *,
+  .arena-ladder__list *::before,
+  .arena-ladder__list *::after {
+    animation: none !important;
+    transition: none !important;
+    will-change: auto !important;
+  }
+
   .section-stage[data-section="arena"] .arena-ladder__list li {
     /* Chrome Android occasionally repaints 3D carousel layers over the board.
        The tray itself supplies the physical movement, so cards stay on the
@@ -8305,6 +8317,8 @@ body:has(.drawer-lab) {
     flex: 0 0 auto;
     perspective: none;
     scroll-snap-align: center;
+    transform-style: flat;
+    will-change: auto;
   }
 
   .arena-ladder__group-start::before {
@@ -8318,6 +8332,9 @@ body:has(.drawer-lab) {
     border-bottom: 0;
     border-right: 1px solid var(--plate-line);
     padding: 6px 7px 6px 4px;
+    backface-visibility: visible;
+    transform-style: flat;
+    will-change: auto;
   }
 
   .arena-ladder__list button[aria-current="true"] {
@@ -8349,6 +8366,7 @@ body:has(.drawer-lab) {
 
   .arena-ladder__sigil {
     width: 44px;
+    overflow: hidden;
   }
 
   .arena-ladder__generation i {
