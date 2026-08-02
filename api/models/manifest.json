@@ -1,0 +1,166 @@
+{
+  "schema_version": 1,
+  "simulations": 160,
+  "opponents": [
+    {
+      "id": "golem",
+      "label": "GOLEM",
+      "file": "golem.onnx",
+      "precision": "int8",
+      "simulations": 160,
+      "version": "v1",
+      "iter": 39,
+      "sha256": "0b8e51ba3abb1919"
+    },
+    {
+      "id": "espectro",
+      "label": "ESPECTRO",
+      "file": "espectro.onnx",
+      "precision": "int8",
+      "simulations": 160,
+      "version": "v2",
+      "iter": 93,
+      "sha256": "546173a7a85014ac"
+    },
+    {
+      "id": "icaro",
+      "label": "ÍCARO",
+      "file": "icaro.onnx",
+      "precision": "int8",
+      "simulations": 160,
+      "version": "v3",
+      "iter": 11,
+      "sha256": "ae36a9e5f5bd985f"
+    },
+    {
+      "id": "augur",
+      "label": "AUGUR",
+      "file": "augur.onnx",
+      "precision": "int8",
+      "simulations": 160,
+      "version": "v4a",
+      "iter": 125,
+      "sha256": "5dcbff139630815b"
+    },
+    {
+      "id": "augur-ocaso",
+      "label": "AUGUR · OCASO",
+      "file": "augur-ocaso.onnx",
+      "precision": "int8",
+      "simulations": 160,
+      "version": "v4b",
+      "iter": 135,
+      "sha256": "dd515bb4b50c7eeb"
+    },
+    {
+      "id": "cerbero",
+      "label": "CERBERO",
+      "file": "cerbero.onnx",
+      "precision": "fp32",
+      "simulations": 160,
+      "version": "v6",
+      "iter": 180,
+      "sha256": "e71e979e8c4135f5"
+    },
+    {
+      "id": "leteo",
+      "label": "LETEO",
+      "file": "leteo.onnx",
+      "precision": "int8",
+      "simulations": 160,
+      "version": "v7",
+      "iter": 140,
+      "sha256": "b57f38feb41ed431"
+    },
+    {
+      "id": "legion",
+      "label": "LEGIÓN",
+      "file": "legion.onnx",
+      "precision": "int8",
+      "simulations": 160,
+      "version": "v8",
+      "iter": 180,
+      "sha256": "eb1fd882eab01f31"
+    },
+    {
+      "id": "quimera",
+      "label": "QUIMERA",
+      "file": "quimera.onnx",
+      "precision": "int8",
+      "simulations": 160,
+      "version": "v9",
+      "iter": 180,
+      "sha256": "4ccf8e888169bee4"
+    },
+    {
+      "id": "cisma",
+      "label": "CISMA",
+      "file": "cisma.onnx",
+      "precision": "int8",
+      "simulations": 160,
+      "version": "v10",
+      "iter": 222,
+      "sha256": "8d5d1a65ecc1c687"
+    },
+    {
+      "id": "plomo",
+      "label": "PLOMO",
+      "file": "plomo.onnx",
+      "precision": "fp32",
+      "simulations": 160,
+      "version": "v11",
+      "iter": 18,
+      "sha256": "c3d9423ca7b395e0"
+    },
+    {
+      "id": "ariete",
+      "label": "ARIETE",
+      "file": "ariete.onnx",
+      "precision": "int8",
+      "simulations": 160,
+      "version": "v11_1",
+      "iter": 41,
+      "sha256": "f01ba59b468c1248"
+    },
+    {
+      "id": "vispera",
+      "label": "VÍSPERA",
+      "file": "vispera.onnx",
+      "precision": "int8",
+      "simulations": 160,
+      "version": "v11_2",
+      "iter": 114,
+      "sha256": "d089ecbd109dc633"
+    },
+    {
+      "id": "vertice",
+      "label": "VÉRTICE",
+      "file": "vertice.onnx",
+      "precision": "int8",
+      "simulations": 160,
+      "version": "v12",
+      "iter": 90,
+      "sha256": "d98762865c0641a5"
+    },
+    {
+      "id": "nemesis",
+      "label": "NÉMESIS",
+      "file": "nemesis.onnx",
+      "precision": "int8",
+      "simulations": 160,
+      "version": "v15_3",
+      "iter": 166,
+      "sha256": "46c02caa5d498072"
+    },
+    {
+      "id": "nemesis-192",
+      "label": "NÉMESIS · 192",
+      "file": "nemesis-192.onnx",
+      "precision": "fp32",
+      "simulations": 160,
+      "version": "v15_3",
+      "iter": 192,
+      "sha256": "d86a8e47759d20d1"
+    }
+  ]
+}

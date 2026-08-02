@@ -13,38 +13,26 @@
     "micro:next": "node scripts/micrographics/next.mjs",
     "micro:claim": "node scripts/micrographics/claim.mjs",
     "micro:mark": "node scripts/micrographics/mark.mjs",
-    "micro:report": "node scripts/micrographics/report.mjs",
-    "embed:kb": "tsx scripts/embed-kb.ts"
+    "micro:report": "node scripts/micrographics/report.mjs"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^3.0.53",
-    "@ai-sdk/react": "^3.0.170",
-    "@chenglou/pretext": "^0.0.3",
-    "@supabase/supabase-js": "^2.104.1",
-    "ai": "^6.0.168",
     "gray-matter": "^4.0.3",
-    "js-tiktoken": "^1.0.21",
     "mermaid": "^11.14.0",
-    "motion": "^12.38.0",
     "next": "latest",
     "next-mdx-remote": "^6.0.0",
     "react": "latest",
     "react-dom": "latest",
-    "react-markdown": "^10.1.0",
     "reading-time": "^1.5.0",
     "rehype-pretty-code": "^0.14.3",
     "remark-gfm": "^4.0.1",
-    "shiki": "^4.0.2",
-    "zod": "^4.3.6"
+    "shiki": "^4.0.2"
   },
   "devDependencies": {
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
-    "dotenv": "^17.4.2",
     "eslint": "latest",
     "eslint-config-next": "latest",
-    "tsx": "^4.21.0",
     "typescript": "latest"
   }
 }
