@@ -360,6 +360,18 @@ function drawStartingPlayer(): Player {
   return Math.random() < 0.5 ? PLAYER_1 : PLAYER_2;
 }
 
+/**
+ * The rung a returning player is actually on: the furthest one their wins
+ * have opened. The arena used to reopen on EASY every time regardless of how
+ * far up the ladder someone had climbed, which meant hunting through the tray
+ * for your place before you could play.
+ */
+function furthestRungId(wins: Readonly<Record<string, number>>): string {
+  const open = unlockedCount(wins);
+  const rung = LADDER[Math.min(open, LADDER.length) - 1] ?? LADDER[0];
+  return rung.id;
+}
+
 export function AtaxxArena({ locale }: { locale: Locale }) {
   const t = COPY[locale];
 
@@ -500,8 +512,10 @@ export function AtaxxArena({ locale }: { locale: Locale }) {
       .then((payload) => {
         if (!live || !payload) return;
         const player = payload.player ?? null;
+        const restored = payload.wins ?? {};
         setSession(player);
-        setWins(payload.wins ?? {});
+        setWins(restored);
+        setSelectedRungId(furthestRungId(restored));
         if (player) setStartingPlayer(drawStartingPlayer());
       })
       .catch(() => undefined)
@@ -540,7 +554,9 @@ export function AtaxxArena({ locale }: { locale: Locale }) {
         return;
       }
       setSession(payload.player ?? null);
-      setWins(payload.wins ?? {});
+      const restored = payload.wins ?? {};
+      setWins(restored);
+      setSelectedRungId(furthestRungId(restored));
       setStartingPlayer(drawStartingPlayer());
     } catch {
       setSignInError(t.errors.unknown);
@@ -712,18 +728,34 @@ export function AtaxxArena({ locale }: { locale: Locale }) {
     setHistory((current) => [...current, { from: selectedCell, to: index }]);
   };
 
-  const seatRungInTray = useCallback((card: HTMLButtonElement) => {
-    const tray = ladderListRef.current;
-    if (!tray || tray.scrollWidth <= tray.clientWidth) return;
+  const seatRungInTray = useCallback(
+    (card: HTMLButtonElement, instant = false) => {
+      const tray = ladderListRef.current;
+      if (!tray || tray.scrollWidth <= tray.clientWidth) return;
 
-    const left = card.offsetLeft - (tray.clientWidth - card.offsetWidth) / 2;
-    tray.scrollTo({
-      left,
-      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-        ? "auto"
-        : "smooth"
-    });
-  }, []);
+      const left = card.offsetLeft - (tray.clientWidth - card.offsetWidth) / 2;
+      tray.scrollTo({
+        left,
+        behavior:
+          instant ||
+          window.matchMedia("(prefers-reduced-motion: reduce)").matches
+            ? "auto"
+            : "smooth"
+      });
+    },
+    []
+  );
+
+  /* Bring the restored rung into view once, without a glide — the tray should
+     already be sitting on your place when the arena opens, not scroll there
+     while you watch. */
+  useEffect(() => {
+    if (!sessionChecked) return;
+    const card = ladderListRef.current?.querySelector<HTMLButtonElement>(
+      'button[aria-current="true"]'
+    );
+    if (card) seatRungInTray(card, true);
+  }, [sessionChecked, seatRungInTray]);
 
   /* Stable across renders — see LadderRung. The card reports whether it was
      already the active one, so this never has to read selectedRungId and

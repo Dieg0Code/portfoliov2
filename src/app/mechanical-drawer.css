@@ -8421,6 +8421,25 @@ body:has(.drawer-lab) {
     height: min(90vw, 50svh, 400px);
   }
 
+  /*
+    Pieces stay on the compositor between moves.
+
+    Dropping the forwards fill let them de-composite when their animation
+    ends, which is correct and took the layer count from 24 to 8 — but it
+    walks into a known Chrome bug: the region an element vacates on the way
+    back from composited to painted is not reliably invalidated, so it keeps
+    showing whatever raster was already there. That is the fine noise across a
+    board row. It clears the moment anything forces a full repaint, which is
+    how it was identified — a DevTools screenshot wiped it every time.
+
+    will-change keeps the piece on its own layer, so the transition never
+    happens. Measured on the device a piece layer is 115x116, about 0.05 MB,
+    so a full board of thirty-eight costs under 2 MB against the 42 MB the
+    page already holds. Touch layouts only; desktop has never shown this.
+  */
+  .arena-piece {
+    will-change: transform;
+  }
 
   .arena-stage {
     /* auto, not minmax(0,1fr): a 1fr row contributes nothing to the stage's
