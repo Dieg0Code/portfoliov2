@@ -7080,7 +7080,19 @@ body:has(.drawer-lab) {
 
 .arena-stage__hud {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  /*
+    The status sits in the flexible track, not in an auto one.
+
+    With `auto` in the middle, the column was measured from whatever the
+    status happened to say, so every change of phrase — ELIGE FICHA, PENSANDO,
+    DERROTA — resized it and the 1fr tracks on either side recalculated with
+    it. The score and the rival plate slid sideways each time the game spoke.
+
+    Pinning both ends to their content and giving the middle the slack keeps
+    them still: the status now grows and shrinks into space nobody else is
+    using, and being centred it does not push off either edge.
+  */
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 8px;
   border-bottom: 1px solid var(--plate-line);
@@ -7156,10 +7168,14 @@ body:has(.drawer-lab) {
 }
 
 .arena-stage__status {
+  /* minmax(0, 1fr) lets the track shrink under its content, so the longest
+     phrases clip rather than force the plates apart again. */
+  overflow: hidden;
   color: var(--plate-ink);
   font-size: 0.54rem;
   letter-spacing: 0.12em;
   text-align: center;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
