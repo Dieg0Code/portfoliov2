@@ -740,19 +740,84 @@ body:has(.drawer-lab) {
   will-change: transform;
 }
 
-.project-drawer__face {
+.project-drawer__face > * {
   animation: project-plate-index 420ms cubic-bezier(0.2, 0.78, 0.16, 1);
 }
 
 @keyframes project-plate-index {
   from {
-    clip-path: inset(0 0 0 12%);
-    opacity: 0.52;
+    transform: translateX(8px);
+    opacity: 0.6;
   }
 
   to {
-    clip-path: inset(0);
+    transform: translateX(0);
     opacity: 1;
+  }
+}
+
+/* Keep both printed plates visible during the cut. The snapshot layer owns
+   project changes; the live face still owns the drawer's drag gesture. */
+@supports (view-transition-name: project-plate) {
+  .project-drawer__face {
+    view-transition-name: project-plate;
+  }
+
+  .project-drawer__face > * {
+    animation: none;
+  }
+}
+
+::view-transition {
+  pointer-events: none;
+}
+
+::view-transition-group(root),
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+::view-transition-group(project-plate) {
+  background: #eee8db;
+  overflow: clip;
+  animation-duration: 460ms;
+  animation-timing-function: cubic-bezier(0.22, 0.8, 0.2, 1);
+}
+
+::view-transition-old(project-plate),
+::view-transition-new(project-plate) {
+  mix-blend-mode: normal;
+  height: 100%;
+  object-fit: fill;
+}
+
+::view-transition-old(project-plate) {
+  animation: project-plate-collect 260ms cubic-bezier(0.4, 0, 0.6, 1) both;
+}
+
+::view-transition-new(project-plate) {
+  animation: project-plate-deal 460ms cubic-bezier(0.22, 0.8, 0.2, 1) both;
+}
+
+@keyframes project-plate-collect {
+  to {
+    opacity: 0;
+    transform: translateX(calc(var(--project-travel, 28px) * -0.65));
+  }
+}
+
+@keyframes project-plate-deal {
+  from {
+    opacity: 0;
+    transform: translateX(var(--project-travel, 28px));
+  }
+  35% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 
@@ -4362,6 +4427,9 @@ body:has(.drawer-lab) {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .project-drawer__face {
+    view-transition-name: none;
+  }
   .project-drawer:not(.is-dragging) .project-drawer__face,
   .section-panel,
   .section-selector__carriage,
@@ -4369,7 +4437,7 @@ body:has(.drawer-lab) {
     transition: none;
   }
 
-  .project-drawer__face {
+  .project-drawer__face > * {
     animation: none;
   }
 

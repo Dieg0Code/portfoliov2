@@ -9,6 +9,7 @@ import {
   type PointerEvent
 } from "react";
 import dynamic from "next/dynamic";
+import { flushSync } from "react-dom";
 
 import { AtaxxPlayCard } from "@/components/home/ataxx-play-card";
 import { AtaxxStrategyDiagram } from "@/components/home/ataxx-strategy-diagram";
@@ -349,6 +350,7 @@ export function MechanicalDrawerPrototype() {
   const [locale, setLocale] = useState<Locale>("es");
   const [activeSection, setActiveSection] = useState<SectionId>("projects");
   const [activeProject, setActiveProject] = useState<ProjectId>("geogreen");
+  const projectTransitionRef = useRef<ViewTransition | null>(null);
   const [isAtaxxCardFlipped, setIsAtaxxCardFlipped] = useState(false);
 
   /*
@@ -535,9 +537,30 @@ export function MechanicalDrawerPrototype() {
   const selectProject = (nextProject: ProjectId) => {
     if (nextProject === activeProject) return;
 
-    settle(false);
-    setIsAtaxxCardFlipped(false);
-    setActiveProject(nextProject);
+    const updateProject = () => {
+      settle(false);
+      setIsAtaxxCardFlipped(false);
+      setActiveProject(nextProject);
+    };
+    projectTransitionRef.current?.skipTransition();
+    if (
+      document.startViewTransition &&
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      const direction =
+        PROJECT_ORDER.indexOf(nextProject) > PROJECT_ORDER.indexOf(activeProject)
+          ? 1
+          : -1;
+      document.documentElement.style.setProperty(
+        "--project-travel",
+        `${direction * 28}px`
+      );
+      projectTransitionRef.current = document.startViewTransition(() => {
+        flushSync(updateProject);
+      });
+    } else {
+      updateProject();
+    }
     window.history.pushState(null, "", `#projects/${nextProject}`);
   };
 
